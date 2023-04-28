@@ -1,0 +1,1 @@
+print(im1.instructions[0].is_valid())

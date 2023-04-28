@@ -10,6 +10,17 @@ class Instruction_Mem:
             # Reads the text file line by line
             while line := file.readline():
                 self.instructions.append(Instruction(line))
+        
+        # We then need to validate each instruction
+        # Deletes all instructions if any of them are invalid
+        for i in range(len(self.instructions)):
+            if self.instructions[i].is_valid() == False:
+                print(f"Invalid Arguments @ Line {i + 1}")
+                self.instructions.clear()
+                break
+        
+        if len(self.instructions) > 0:
+            print("Successfully Loaded All Instructions")
     
     # Displays all instructions in memory
     def display(self):

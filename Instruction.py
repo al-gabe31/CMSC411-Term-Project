@@ -1,3 +1,5 @@
+from functions import *
+
 # Contains the code for the Instruction class
 
 # List of all supported instructions
@@ -22,6 +24,31 @@ NUM_CYCLES = {
     'SUBI': 2,
     'MULT': 4,
     'MULTI': 4
+}
+
+# Operand Type:
+#   0 - Register Type               Reg
+#   1 - Immediate Type              Imm
+#   2 - Register Displacement Type  Disp
+#   3 - Label Type                  Labl
+INSTRUCTION_FORMAT = {
+    'LW': [0, 2],       # Reg   Disp
+    'SW': [0, 2],       # Reg   Disp
+    'LI': [0, 1],       # Reg   Imm
+    'ADD': [0, 0, 0],   # Reg   Reg     Reg
+    'ADDI': [0, 0, 1],  # Reg   Reg     Imm
+    'SUB': [0, 0, 0],   # Reg   Reg     Reg
+    'SUBI': [0, 0, 1],  # Reg   Reg     Imm
+    'AND': [0, 0, 0],   # Reg   Reg     Reg
+    'ANDI': [0, 0, 1],  # Reg   Reg     Imm
+    'OR': [0, 0, 0],    # Reg   Reg     Reg
+    'ORI': [0, 0, 1],   # Reg   Reg     Imm
+    'J': [3],           # Labl
+    'BNE': [0, 0, 3],   # Reg   Reg     Labl
+    'BEQ': [0, 0, 3],   # Reg   Reg     Labl
+    'MULT': [0, 0, 0],  # Reg   Reg     Reg
+    'MULTI': [0, 0, 1],  # Reg   Reg     Imm
+    'HLT': []
 }
 
 class Instruction:
@@ -64,10 +91,26 @@ class Instruction:
         # Dealing with Operands
         self.operands = []
         while len(adding) > 0 and adding[0] != '#':
-            self.operands.append(adding.pop(0).upper())
+            self.operands.append(adding.pop(0).upper().replace(',', ''))
         
         # Dealing with Remarks
         self.remarks = " ".join(adding)
+    
+    # Checks if an Instruction is a valid one
+    def is_valid(self):
+        # Checks if OP Code is valid
+        if self.op_code not in INSTRUCTION_TYPES:
+            return False
+        
+        # Checks if operand(s) are valid
+        if len(self.operands) != len(INSTRUCTION_FORMAT[self.op_code]):
+            return False
+        
+        for i in range(len(self.operands)):
+            if get_operand_type(self.operands[i]) != INSTRUCTION_FORMAT[self.op_code][i]:
+                return False
+        
+        return True
     
     def __str__(self):
         return f"LABEL: {self.label}\nOP CODE: {self.op_code}\nOPERANDS: {self.operands}\nREMARKS: {self.remarks}"
