@@ -56,6 +56,8 @@ class Instruction:
     # Parses the string and assigns the correct values for label, op_code, operands, and remarks
     def __init__(self, line):
         # Attributes
+        self.line = ""
+        
         self.label = None           # String
         self.op_code = None         # String
         self.operands = None        # Array of String
@@ -95,6 +97,8 @@ class Instruction:
         
         # Dealing with Remarks
         self.remarks = " ".join(adding)
+
+        self.line = f"{self.label} {self.op_code} {self.operands} {self.remarks}"
     
     # Checks if an Instruction is a valid one
     def is_valid(self):
@@ -111,6 +115,9 @@ class Instruction:
                 return False
         
         return True
+
+    def is_null(self):
+        return self.op_code == "NULL"
     
     def __str__(self):
         return f"LABEL: {self.label}\nOP CODE: {self.op_code}\nOPERANDS: {self.operands}\nREMARKS: {self.remarks}"
