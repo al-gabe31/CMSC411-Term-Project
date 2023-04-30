@@ -1,6 +1,7 @@
 # Contains the code for the Processor class
 from Instruction import *
 from Instruction_Mem import *
+from Register import *
 
 class Processor:
     def __init__(self, file):
@@ -12,7 +13,7 @@ class Processor:
         self.MEM = Instruction("NULL")                         # Instruction in Memory stage
         self.WB = Instruction("NULL")                          # Instruction in Write Back stage
 
-        self.registers = [None for i in range(32)]
+        self.registers = [Register() for i in range(32)]
     
     def is_all_null(self):
         return self.IF.is_null() and self.ID.is_null() and self.EX[0].is_null() and self.EX[1].is_null() and self.EX[2].is_null() and self.EX[3].is_null() and self.MEM.is_null() and self.WB.is_null()
@@ -49,7 +50,7 @@ class Processor:
         cycle_num = 1
         
         # Loading all instructions into the processor stage
-        while len(self.inst_mem.instructions) > 0 or self.is_all_null() == False:
+        while len(self.inst_mem.instructions) > 0 or self.is_all_null() == False and cycle_num < 50:
             print(f"CYCLE {cycle_num}")
             self.shift()
             self.display_curr_state()

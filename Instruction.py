@@ -10,7 +10,6 @@ NUM_CYCLES = {
     'J': 0,
     'BEQ': 0,
     'BNE': 0,
-    'LI': 0,
     'AND': 1,
     'ANDI': 1,
     'OR': 1,
@@ -23,7 +22,9 @@ NUM_CYCLES = {
     'SUB': 2,
     'SUBI': 2,
     'MULT': 4,
-    'MULTI': 4
+    'MULTI': 4,
+    'HLT': 0,
+    'NULL': 4
 }
 
 # Operand Type:
