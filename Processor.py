@@ -18,18 +18,89 @@ class Processor:
     def is_all_null(self):
         return self.IF.is_null() and self.ID.is_null() and self.EX[0].is_null() and self.EX[1].is_null() and self.EX[2].is_null() and self.EX[3].is_null() and self.MEM.is_null() and self.WB.is_null()
     
+    def act_IF(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.ID.is_null():
+            self.ID = self.IF
+            self.IF = Instruction("NULL")
+    
+    def act_ID(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.EX[0].is_null():
+            self.EX[0] = self.ID
+            self.ID = Instruction("NULL")
+    
+    def act_EX1(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.EX[1].is_null():
+            self.EX[1] = self.EX[0]
+            self.EX[0] = Instruction("NULL")
+    
+    def act_EX2(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.EX[2].is_null():
+            self.EX[2] = self.EX[1]
+            self.EX[1] = Instruction("NULL")
+    
+    def act_EX3(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.EX[3].is_null():
+            self.EX[3] = self.EX[2]
+            self.EX[2] = Instruction("NULL")
+    
+    def act_EX4(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.MEM.is_null():
+            self.MEM = self.EX[3]
+            self.EX[3] = Instruction("NULL")
+    
+    def act_MEM(self, instruction):
+        # Do something here
+
+        # Move instruction to the next stage (if possible)
+        if self.WB.is_null():
+            self.WB = self.MEM
+            self.MEM = Instruction("NULL")
+    
+    def act_WB(self, instruction):
+        # Do something here
+
+        # Remove instruction from the pipeline
+        self.WB = Instruction("NULL")
+    
     # Shifts all Instructions to their next stage
     def shift(self):
-        self.WB = self.MEM
+        # self.WB = self.MEM
 
-        # Execute stages of the processor (can get kinda tricky)
-        self.MEM = self.EX[3]
-        self.EX[3] = self.EX[2]
-        self.EX[2] = self.EX[1]
-        self.EX[1] = self.EX[0]
-        self.EX[0] = self.ID
+        # # Execute stages of the processor (can get kinda tricky)
+        # self.MEM = self.EX[3]
+        # self.EX[3] = self.EX[2]
+        # self.EX[2] = self.EX[1]
+        # self.EX[1] = self.EX[0]
+        # self.EX[0] = self.ID
         
-        self.ID = self.IF
+        # self.ID = self.IF
+
+        self.act_WB(self.WB)
+        self.act_MEM(self.MEM)
+        self.act_EX4(self.EX[3])
+        self.act_EX3(self.EX[2])
+        self.act_EX2(self.EX[1])
+        self.act_EX1(self.EX[0])
+        self.act_ID(self.ID)
+        self.act_IF(self.IF)
 
         if len(self.inst_mem.instructions) > 0:
             self.IF = self.inst_mem.instructions.pop(0)

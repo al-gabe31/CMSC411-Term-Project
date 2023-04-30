@@ -2,7 +2,7 @@
 from Instruction import *
 from Instruction_Mem import *
 
-NUM_BITS_IN_REG = 16
+NUM_BITS_IN_REG = 32
 
 class Register:
     def __init__(self):
