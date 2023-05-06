@@ -1,1 +1,2 @@
-print(im1.instructions[0].is_valid())
+
+with open("data.txt", "r") as file:

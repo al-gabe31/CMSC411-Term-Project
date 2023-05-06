@@ -41,3 +41,22 @@ def get_operand_type(operand):
     else:
         # print("Invalid Case")
         return -1
+
+# Converts an integer into its signed 32-bit string version
+def int_to_bit(value):
+    returner = ""
+
+    if value < 0:
+        returner += "1"
+        value += pow(2, 31)
+    else:
+        returner += "0"
+    
+    for i in range(30, -1, -1):
+        if value >= pow(2, i):
+            returner += "1"
+            value -= pow(2, i)
+        else:
+            returner += "0"
+    
+    return returner

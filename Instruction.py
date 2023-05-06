@@ -67,13 +67,10 @@ class Instruction:
         # Index     Cycle Stage
         # 0         IF
         # 1         ID
-        # 2         EX1
-        # 3         EX2
-        # 4         EX3
-        # 5         EX4
-        # 6         MEM
-        # 7         WB
-        self.cycle_stops = [-1, -1, -1, -1, -1, -1, -1, -1]
+        # 2         EX4
+        # 3         MEM
+        # 4         WB
+        self.cycle_stops = [-1, -1, -1, -1, -1]
 
         # Parsing command starts here
         if line.find('\n') != -1: # Removes the '\n' at the end if it has one
