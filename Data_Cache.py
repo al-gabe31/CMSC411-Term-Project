@@ -161,6 +161,14 @@ class Data_Cache:
 
         # Officially updates the data in cache
         self.cache[set_address][block_address][data_address].update(new_value)
+        self.data[line_index].update(new_value)
+    
+    def write_back_to_mem(self):
+        # DON'T FORGET TO CHANGE THIS TO "data.txt"
+        with open("dummy_data.txt", "w") as file:
+            for i in range(len(self.data)):
+                line = self.data[i].data_string + "\n"
+                file.write(line)
     
     # This is mostly for debugging
     def print_all_data(self):

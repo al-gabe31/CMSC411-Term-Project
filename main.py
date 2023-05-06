@@ -28,6 +28,7 @@ if dc1.update_data_in_cache(260, 5) != 1:
     values = [i.data_decimal for i in dc1.cache["set0"][0]]
     print(values)
     print(dc1.lru_indeces[0])
+dc1.write_back_to_mem()
 # if dc1.put_data_in_cache(256 + (0 * 4)) != -1:
 #     values = [i.data_decimal for i in dc1.cache["set0"][1]]
 #     print(values)

@@ -9,6 +9,9 @@ class Register:
         self.data = 0
         self.bits = [0 for i in range(NUM_BITS_IN_REG)]
     
+    # Updates the data stored into the register
+    # Returns 0 on success
+    # Returns -1 on failure
     def insert_data(self, data):
         # First checks that the data is valid
         if isinstance(data, int) == False or data < 0 or data > pow(2, NUM_BITS_IN_REG) - 1:
