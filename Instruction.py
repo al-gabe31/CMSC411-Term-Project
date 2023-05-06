@@ -16,7 +16,7 @@ NUM_CYCLES = {
     'ORI': 1,
     'LW': 1,
     'SW': 1,
-    'LI': 1,
+    'LI': 0,
     'ADD': 2,
     'ADDI': 2,
     'SUB': 2,

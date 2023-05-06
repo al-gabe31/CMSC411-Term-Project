@@ -98,18 +98,25 @@ class Data_Cache:
             return 3
         return -1
     
+    # Retrieves data from memory and puts it into cache
+    # Returns -1 for any error cases (fails to put data into cache)
     def put_data_in_cache(self, address):
-        # We can't put data into cache if any of the following cases
+        # We can't put data into cache in any of the following cases
         if address < 256 or address >= 384:
-            return -1
+            return -1 # Address out of bounds
         if self.miss_cycles_left > 0:
-            return -1
+            return -1 # Can't put during a data-cache miss
         
         line_index = address - 256 # Since data starts at address 0x100
         line_index /= 4 # Has to be word aligned
         line_index = int(line_index)
 
         base_data = self.data[line_index]
+
+        if self.data_in_cache(base_data.data_decimal) == True:
+            print("ERROR - Can't put data in cache if it's already there")
+            return -1 # Can't put data into cache if it's already there
+        
         set_number = int(line_index / 4) % 2
         set_string = ""
         if set_number == 0:
@@ -128,6 +135,32 @@ class Data_Cache:
         # Update LRU block index
         self.lru_indeces[set_number] += 1
         self.lru_indeces[set_number] %= 2
+    
+    # Updates data from cache and in memory
+    def update_data_in_cache(self, address, new_value):
+        # We can't update data from cache in any of the following cases
+        if address < 256 or address >= 384:
+            return -1 # Address out of bounds
+        if self.miss_cycles_left > 0:
+            return -1 # Can't update during a data-cache miss
+        
+        line_index = address - 256 # Since data starts at address 0x100
+        line_index /= 4 # Has to be word aligned
+        line_index = int(line_index)
+
+        base_data = self.data[line_index]
+        base_value = base_data.data_decimal
+
+        if self.data_in_cache(base_data.data_decimal) == False:
+            print("ERROR - Can't update data in cache since it's not there")
+            return -1 # Can't update data from cache if it's not there
+        
+        set_address = self.get_set_address(base_value)
+        block_address = self.get_block_address(set_address, base_value)
+        data_address = self.get_data_address(set_address, block_address, base_value)
+
+        # Officially updates the data in cache
+        self.cache[set_address][block_address][data_address].update(new_value)
     
     # This is mostly for debugging
     def print_all_data(self):
