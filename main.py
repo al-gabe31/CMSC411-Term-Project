@@ -4,6 +4,8 @@ from Processor import *
 from Data import *
 from Data_Cache import *
 
+# TESTING Data_Cache
+
 # data = []
 # with open("data.txt", "r") as file:
 #     while line := file.readline():
@@ -17,18 +19,18 @@ from Data_Cache import *
 # print(d1.data_binary)
 # print(d1.data_decimal)
 
-dc1 = Data_Cache("data.txt")
-dc1.print_all_data()
-print("\n\n")
-if dc1.put_data_in_cache(256) != -1:
-    values = [i.data_decimal for i in dc1.cache["set0"][0]]
-    print(values)
-    print(dc1.lru_indeces[0])
-if dc1.update_data_in_cache(260, 5) != 1:
-    values = [i.data_decimal for i in dc1.cache["set0"][0]]
-    print(values)
-    print(dc1.lru_indeces[0])
-dc1.write_back_to_mem()
+# dc1 = Data_Cache("data.txt")
+# dc1.print_all_data()
+# print("\n\n")
+# if dc1.put_data_in_cache(256) != -1:
+#     values = [i.data_decimal for i in dc1.cache["set0"][0]]
+#     print(values)
+#     print(dc1.lru_indeces[0])
+# if dc1.update_data_in_cache(260, 5) != 1:
+#     values = [i.data_decimal for i in dc1.cache["set0"][0]]
+#     print(values)
+#     print(dc1.lru_indeces[0])
+# dc1.write_back_to_mem()
 # if dc1.put_data_in_cache(256 + (0 * 4)) != -1:
 #     values = [i.data_decimal for i in dc1.cache["set0"][1]]
 #     print(values)
@@ -38,16 +40,69 @@ dc1.write_back_to_mem()
 #     print(values)
 #     print(dc1.lru_indeces[0])
 
+
+
+# TESTING Processor
+
 # p1 = Processor("inst.txt")
-# print(p1.is_all_null())
+# print(p1.inst_mem.label_indeces)
 # p1.run()
 
 
+
+# TESTING Registers
 
 # registers = [Register() for i in range(32)]
 # registers[0].insert_data(65537)
 # print(registers[0].data)
 # print(registers[0].bits)
+
+
+
+# TESTING Instruction_Mem
+
+im1 = Instruction_Mem("inst.txt")
+# im1.display()
+# im1.put_instruction_in_cache(0)
+# im1.put_instruction_in_cache(4)
+# im1.put_instruction_in_cache(2)
+# im1.put_instruction_in_cache(3)
+# for block in im1.cache:
+#     for instruction in block:
+#         print(f"{instruction.line}")
+#     print("\n\n")
+
+# print(im1.instruction_in_cache(1))
+# for instruction in im1.instructions:
+#     print(instruction.operands)
+
+# for line in range(len(im1.instructions)):
+#     print(f"{line + 1} --> {im1.instruction_in_cache(line)}")
+# print(im1.instruction_in_cache(5))
+
+safety = 30
+index = 0
+num_miss = 0
+num_access = 0
+num_hits = 0
+while im1.pc_out_of_bounds() == False and index < safety:
+    if im1.instruction_in_cache(index) == False:
+        print("I-Cache Miss")
+        num_miss += 1
+        im1.put_instruction_in_cache(index)
+    else:
+        print("Instruction Hit!")
+        num_hits += 1
+    print("Accessing from I-Cache")
+    num_access += 1
+    im1.program_counter += 1
+    
+    index += 1
+print("\n\n")
+print(f"Num Miss --> {num_miss}")
+print(f"Num Access --> {num_access}")
+print(f"Num Hits --> {num_hits}")
+
 
 
 print("EXITED WITHOUT ERROR")

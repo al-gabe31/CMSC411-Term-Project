@@ -12,12 +12,17 @@ class Data_Cache:
         self.miss_cycles_left = 0
         self.lru_indeces = [0, 0] # First index is for set0 and the second for set1
 
+        # IMPORTANT DATA FOR output.txt
+        self.num_access_requests = 0
+        self.num_data_cache_hits = 0
+
         with open(file, "r") as file:
             # Reads the text file line by line
             while line := file.readline():
                 self.data.append(Data(line[0:32]))
     
-    # Returns true if a specific data is located in cache (somewhere)
+    # Returns True if a specific data is located in cache (somewhere)
+    # Returns False otherwise
     def data_in_cache(self, value):
         values = []
 
@@ -163,6 +168,7 @@ class Data_Cache:
         self.cache[set_address][block_address][data_address].update(new_value)
         self.data[line_index].update(new_value)
     
+    # On second thought, we might now have to do this...
     def write_back_to_mem(self):
         # DON'T FORGET TO CHANGE THIS TO "data.txt"
         with open("dummy_data.txt", "w") as file:

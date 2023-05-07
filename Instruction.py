@@ -119,3 +119,23 @@ class Instruction:
     
     def __str__(self):
         return f"LABEL: {self.label}\nOP CODE: {self.op_code}\nOPERANDS: {self.operands}\nREMARKS: {self.remarks}"
+    
+    def __eq__(self, otherInstruction):
+        if len(self.operands) != len(otherInstruction.operands):
+            return False
+        
+        for i in range(len(self.operands)):
+            if self.operands[i] != otherInstruction.operands[i]:
+                return False
+            
+        # if self.label != otherInstruction.label:
+        #     # print(f"{self.label} != {otherInstruction.label}")
+        #     print("FLAG 1")
+        # if self.op_code != otherInstruction.op_code:
+        #     print("FLAG 2")
+        # if self.remarks != otherInstruction.remarks:
+        #     print("FLAG 3")
+        
+        # print(f"{self.operands}\t{otherInstruction.operands}")
+        
+        return self.label == otherInstruction.label and self.op_code == otherInstruction.op_code and self.remarks == otherInstruction.remarks
