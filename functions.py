@@ -60,3 +60,20 @@ def int_to_bit(value):
             returner += "0"
     
     return returner
+
+# Returns the register number from an operand
+def get_reg_num(operand):
+    # return int(operand[1:])
+
+    # Register Type Case
+    if get_operand_type(operand) == 0:
+        return int(operand[1:])
+
+    # Displacement Type Case
+    elif get_operand_type(operand) == 2:
+        left_index = operand.index("(")
+        right_index = operand.index(")")
+        return int(operand[left_index + 2: right_index])
+
+    # Error Case
+    return -1

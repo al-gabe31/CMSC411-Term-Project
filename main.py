@@ -51,15 +51,15 @@ p1.run()
 print(f"Total requests for I-Cache --> {p1.inst_mem.num_access_requests}")
 print(f"Number of I-Cache hits --> {p1.inst_mem.num_inst_cache_hits}")
 print("\n\n")
-for instruction in p1.inst_mem.instructions:
-    print(f"Finished IF at cycle {instruction.cycle_stops[0]}")
+for instruction in p1.instructions:
+    print(f"Instruction ID {instruction.instruction_id} finished IF at cycle {instruction.cycle_stops[0]}")
 
 
 
 # TESTING Registers
 
 # registers = [Register() for i in range(32)]
-# registers[0].insert_data(65537)
+# registers[0].insert_data(-4)
 # print(registers[0].data)
 # print(registers[0].bits)
 

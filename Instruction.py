@@ -72,6 +72,8 @@ class Instruction:
         # 4         WB
         self.cycle_stops = [-1, -1, -1, -1, -1]
 
+        self.instruction_id = -1 # Helps differentiate between multiple clones of the same instruction
+
         # Parsing command starts here
         if line.find('\n') != -1: # Removes the '\n' at the end if it has one
             line = line[:line.find('\n')]
