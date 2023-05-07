@@ -44,12 +44,8 @@ class Processor:
         # Move instruction to the next stage (if possible)
         if self.ID.is_null() and self.inst_mem.miss_cycles_left == 0:
             # Record exit cycle for this instruction
-            # print(f"FINISH IF STAGE AT CYCLE {self.cycle_num}")
-            # self.inst_mem.instructions[self.program_counter].cycle_stops[0] = self.cycle_num
 
-            looker_index = self.locate_instruction_id(instruction.instruction_id)
-            if looker_index in range(len(self.instructions)):
-                self.instructions[looker_index].cycle_stops[0] = self.cycle_num
+            self.update_stop_cycle(instruction.instruction_id, 0)
             
             self.ID = self.IF
             self.IF = Instruction("NULL")
@@ -191,3 +187,9 @@ class Processor:
             
         # If it hasn't found it at this point, return -1
         return -1 # instruction_id not in self.instructions for whatever reason
+
+    # Updates the stop cycle of an instrution by instruction_id
+    def update_stop_cycle(self, instruction_id, cycle_num):
+        index = self.locate_instruction_id(instruction_id)
+        if index in range(len(self.instructions)):
+            self.instructions[index].cycle_stops[cycle_num] = self.cycle_num
