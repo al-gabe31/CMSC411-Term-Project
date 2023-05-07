@@ -7,7 +7,6 @@ class Instruction_Mem:
         self.instructions = []      # Contains all instructions from memory
         self.cache = [[Instruction("NULL") for j in range(4)] for i in range(4)]
         self.curr_block_destination = 0 # Current block to put instructions in
-        self.program_counter = 0 # Index of current instruction
         self.miss_cycles_left = 0
         self.label_indeces = {
 
@@ -90,8 +89,8 @@ class Instruction_Mem:
     
     # Returns true if program counter is out of bounds
     # Returns false otherwise
-    def pc_out_of_bounds(self):
-        return self.program_counter < 0 or self.program_counter >= len(self.instructions)
+    def pc_out_of_bounds(self, program_counter):
+        return program_counter < 0 or program_counter >= len(self.instructions)
     
     # This is mostly for debugging
     # Displays all instructions in memory

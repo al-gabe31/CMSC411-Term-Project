@@ -2,10 +2,16 @@
 from Instruction import *
 from Instruction_Mem import *
 from Register import *
+from Data import *
+from Data_Cache import *
 
 class Processor:
-    def __init__(self, file):
-        self.inst_mem = Instruction_Mem(file)
+    def __init__(self, inst_file, data_file):
+        # I know the naming scheme is inconsistent... but just stick with it for now TT_TT
+        self.inst_mem = Instruction_Mem(inst_file)
+        self.data_cache = Data_Cache(data_file)
+
+        self.program_counter = 0 # Keeps track of which instruction we're on
 
         self.IF = Instruction("NULL")                          # Instruction in Instruction Fetch stage
         self.ID = Instruction("NULL")                          # Instruction in Instruction Decode stage
@@ -119,9 +125,10 @@ class Processor:
     
     def run(self):
         cycle_num = 1
+        SAFETY = 100 # Prevents infinite while loop
         
         # Loading all instructions into the processor stage
-        while len(self.inst_mem.instructions) > 0 or self.is_all_null() == False and cycle_num < 50:
+        while len(self.inst_mem.instructions) > 0 or self.is_all_null() == False and cycle_num < SAFETY:
             print(f"CYCLE {cycle_num}")
             self.shift()
             self.display_curr_state()

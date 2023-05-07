@@ -44,9 +44,10 @@ from Data_Cache import *
 
 # TESTING Processor
 
-# p1 = Processor("inst.txt")
-# print(p1.inst_mem.label_indeces)
-# p1.run()
+p1 = Processor("inst.txt", "data.txt")
+p1.run()
+# p1.inst_mem.display()
+# p1.data_cache.print_all_data()
 
 
 
@@ -61,7 +62,7 @@ from Data_Cache import *
 
 # TESTING Instruction_Mem
 
-im1 = Instruction_Mem("inst.txt")
+# im1 = Instruction_Mem("inst.txt")
 # im1.display()
 # im1.put_instruction_in_cache(0)
 # im1.put_instruction_in_cache(4)
@@ -80,28 +81,28 @@ im1 = Instruction_Mem("inst.txt")
 #     print(f"{line + 1} --> {im1.instruction_in_cache(line)}")
 # print(im1.instruction_in_cache(5))
 
-safety = 30
-index = 0
-num_miss = 0
-num_access = 0
-num_hits = 0
-while im1.pc_out_of_bounds() == False and index < safety:
-    if im1.instruction_in_cache(index) == False:
-        print("I-Cache Miss")
-        num_miss += 1
-        im1.put_instruction_in_cache(index)
-    else:
-        print("Instruction Hit!")
-        num_hits += 1
-    print("Accessing from I-Cache")
-    num_access += 1
-    im1.program_counter += 1
+# safety = 30
+# index = 0
+# num_miss = 0
+# num_access = 0
+# num_hits = 0
+# while im1.pc_out_of_bounds() == False and index < safety:
+#     if im1.instruction_in_cache(index) == False:
+#         print("I-Cache Miss")
+#         num_miss += 1
+#         im1.put_instruction_in_cache(index)
+#     else:
+#         print("Instruction Hit!")
+#         num_hits += 1
+#     print("Accessing from I-Cache")
+#     num_access += 1
+#     im1.program_counter += 1
     
-    index += 1
-print("\n\n")
-print(f"Num Miss --> {num_miss}")
-print(f"Num Access --> {num_access}")
-print(f"Num Hits --> {num_hits}")
+#     index += 1
+# print("\n\n")
+# print(f"Num Miss --> {num_miss}")
+# print(f"Num Access --> {num_access}")
+# print(f"Num Hits --> {num_hits}")
 
 
 
