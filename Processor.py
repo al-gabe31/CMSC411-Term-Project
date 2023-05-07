@@ -4,14 +4,19 @@ from Instruction_Mem import *
 from Register import *
 from Data import *
 from Data_Cache import *
+from copy import *
 
 class Processor:
     def __init__(self, inst_file, data_file):
+        self.cycle_num = 1
+        
         # I know the naming scheme is inconsistent... but just stick with it for now TT_TT
         self.inst_mem = Instruction_Mem(inst_file)
         self.data_cache = Data_Cache(data_file)
 
         self.program_counter = 0 # Keeps track of which instruction we're on
+
+        self.HLT_ID = False # Records if a HLT instruction has passed the ID stage
 
         self.IF = Instruction("NULL")                          # Instruction in Instruction Fetch stage
         self.ID = Instruction("NULL")                          # Instruction in Instruction Decode stage
@@ -26,11 +31,28 @@ class Processor:
     
     def act_IF(self, instruction):
         # Do something here
+        # if self.inst_mem.instruction_in_cache(self.program_counter) == False:
+        #     print("I-Cache Miss")
+        #     self.inst_mem.put_instruction_in_cache(self.program_counter)
+        #     self.inst_mem.miss_cycles_left == 11
+        # else:
+        #     print("Instruction Hit!")
+        #     self.inst_mem.num_inst_cache_hits += 1
+        if instruction.is_null() == False:
+            print("Accessing from I-Cache")
+            self.inst_mem.num_access_requests += 1
 
         # Move instruction to the next stage (if possible)
-        if self.ID.is_null():
+        if self.ID.is_null() and self.inst_mem.miss_cycles_left == 0:
+            if self.inst_mem.pc_out_of_bounds(self.program_counter) == False:
+                # Record exit cycle for this instruction
+                print(f"FINISH IF STAGE AT CYCLE {self.cycle_num}")
+                self.inst_mem.instructions[self.program_counter].cycle_stops[0] = self.cycle_num
+            
             self.ID = self.IF
             self.IF = Instruction("NULL")
+        # else:
+        #     self.inst_mem.miss_cycles_left -= 1
     
     def act_ID(self, instruction):
         # Do something here
@@ -108,8 +130,24 @@ class Processor:
         self.act_ID(self.ID)
         self.act_IF(self.IF)
 
-        if len(self.inst_mem.instructions) > 0:
-            self.IF = self.inst_mem.instructions.pop(0)
+        # if len(self.inst_mem.instructions) > 0:
+        #     self.IF = self.inst_mem.instructions.pop(0)
+        # else:
+        #     self.IF = Instruction("NULL")
+
+        if self.inst_mem.miss_cycles_left > 0:
+            print("I-Cache Miss STALL")
+            self.inst_mem.miss_cycles_left -= 1
+        elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == True:
+            print("I-Cache Hit!")
+            self.inst_mem.num_inst_cache_hits += 1
+            self.IF = deepcopy(self.inst_mem.instructions[self.program_counter])
+            self.program_counter += 1
+        elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False:
+            print("I-Cache Miss")
+            self.inst_mem.put_instruction_in_cache(self.program_counter)
+            self.inst_mem.miss_cycles_left = 10
+            self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
         else:
             self.IF = Instruction("NULL")
     
@@ -124,15 +162,21 @@ class Processor:
         print(f"WB --> {self.WB.line}")
     
     def run(self):
-        cycle_num = 1
         SAFETY = 100 # Prevents infinite while loop
         
         # Loading all instructions into the processor stage
-        while len(self.inst_mem.instructions) > 0 or self.is_all_null() == False and cycle_num < SAFETY:
-            print(f"CYCLE {cycle_num}")
+        while self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False and self.cycle_num < SAFETY:
+            print(f"CYCLE {self.cycle_num}")
             self.shift()
             self.display_curr_state()
-            cycle_num += 1
+            self.cycle_num += 1
             print("")
+        
+        # while len(self.inst_mem.instructions) > 0 or self.is_all_null() == False and cycle_num < SAFETY:
+        #     print(f"CYCLE {cycle_num}")
+        #     self.shift()
+        #     self.display_curr_state()
+        #     cycle_num += 1
+        #     print("")
         
         # Finishing all instructions in the processor stage

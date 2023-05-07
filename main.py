@@ -48,6 +48,11 @@ p1 = Processor("inst.txt", "data.txt")
 p1.run()
 # p1.inst_mem.display()
 # p1.data_cache.print_all_data()
+print(f"Total requests for I-Cache --> {p1.inst_mem.num_access_requests}")
+print(f"Number of I-Cache hits --> {p1.inst_mem.num_inst_cache_hits}")
+print("\n\n")
+for instruction in p1.inst_mem.instructions:
+    print(f"Finished IF at cycle {instruction.cycle_stops[0]}")
 
 
 
