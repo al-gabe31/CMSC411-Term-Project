@@ -52,7 +52,7 @@ print(f"Total requests for I-Cache --> {p1.inst_mem.num_access_requests}")
 print(f"Number of I-Cache hits --> {p1.inst_mem.num_inst_cache_hits}")
 print("\n\n")
 for instruction in p1.instructions:
-    print(f"Instruction ID {instruction.instruction_id} finished IF at cycle {instruction.cycle_stops[0]}")
+    print(f"Instruction ID {instruction.instruction_id} finished stages at cycles {instruction.cycle_stops}")
 
 
 

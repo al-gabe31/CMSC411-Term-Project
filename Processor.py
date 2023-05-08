@@ -44,7 +44,6 @@ class Processor:
         # Move instruction to the next stage (if possible)
         if self.ID.is_null() and self.inst_mem.miss_cycles_left == 0:
             # Record exit cycle for this instruction
-
             self.update_stop_cycle(instruction.instruction_id, 0)
             
             self.ID = self.IF
@@ -55,6 +54,9 @@ class Processor:
 
         # Move instruction to the next stage (if possible)
         if self.EX[0].is_null():
+            # Record exit cycle for this instruction
+            self.update_stop_cycle(instruction.instruction_id, 1)
+            
             self.EX[0] = self.ID
             self.ID = Instruction("NULL")
     
@@ -87,6 +89,9 @@ class Processor:
 
         # Move instruction to the next stage (if possible)
         if self.MEM.is_null():
+            # Record exit cycle for this instruction
+            self.update_stop_cycle(instruction.instruction_id, 2)
+            
             self.MEM = self.EX[3]
             self.EX[3] = Instruction("NULL")
     
@@ -95,6 +100,9 @@ class Processor:
 
         # Move instruction to the next stage (if possible)
         if self.WB.is_null():
+            # Record exit cycle for this instruction
+            self.update_stop_cycle(instruction.instruction_id, 3)
+            
             self.WB = self.MEM
             self.MEM = Instruction("NULL")
     
@@ -102,6 +110,9 @@ class Processor:
         # Do something here
 
         # Remove instruction from the pipeline
+        # Record exit cycle for this instruction
+        self.update_stop_cycle(instruction.instruction_id, 4)
+        
         self.WB = Instruction("NULL")
     
     # Shifts all Instructions to their next stage
