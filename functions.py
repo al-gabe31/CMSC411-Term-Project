@@ -77,3 +77,12 @@ def get_reg_num(operand):
 
     # Error Case
     return -1
+
+# Gets only the substring containing the register and number in a displacement operand
+def get_reg_substring(disp_operand):
+    if get_operand_type(disp_operand) == 2:
+        left_index = disp_operand.index("(")
+        right_index = disp_operand.index(")")
+        return disp_operand[left_index + 1: right_index]
+    
+    return ""

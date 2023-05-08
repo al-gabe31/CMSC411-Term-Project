@@ -15,6 +15,8 @@ class Processor:
         self.inst_mem = Instruction_Mem(inst_file)
         self.data_cache = Data_Cache(data_file)
 
+        self.in_cache_miss = False
+
         self.program_counter = 0 # Keeps track of which instruction we're on
 
         self.HLT_ID = False # Records if a HLT instruction has passed the ID stage
@@ -51,9 +53,188 @@ class Processor:
     
     def act_ID(self, instruction):
         # Do something here
+        is_ready = True # Determines if an instruction is ready for the next stage
+
+        # Special Cases for ID Stage:
+        #   - J
+        #   - BEQ
+        #   - BNE
+        #   - LI
+        #   - HLT
+        # Everything else just puts things into the forwarding buffer
+        if instruction.op_code == "J":
+            self.program_counter = self.inst_mem.label_indeces[instruction.label]
+
+            # Don't forget to clear the IF stage and remove this instruction from the pipeline
+            self.IF = Instruction("NULL")
+            self.update_stop_cycle(instruction.instruction_id, 1)
+            self.ID = Instruction("NULL")
+        
+        elif instruction.op_code == "BEQ":
+            flags = [False, False]
+            
+            # First checks if either registers are currently in self.forwarding
+            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding):
+                # Forwarding not yet ready for first operand
+                if flag_1 and self.forwarding[instruction.operands[0]] == "None":
+                    is_ready = False
+                else:
+                    flags[0] = True # Take data from forwarding unit instead
+                
+                # Forwarding not yet ready for second operand
+                if flag_2 and self.forwarding[instruction.operands[1]] == "None":
+                    is_ready = False
+                else:
+                    flags[1] = True # Take data from forwarding unit instead
+            
+            # If both registers are ready, then check for "equal"
+            if is_ready:
+                reg1 = self.registers[get_reg_num(instruction.operands[0])]
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                if flags[0] == True:
+                    reg1 = Register()
+                    reg1.insert_data(self.forwarding[instruction.operands[0]])
+                
+                if flags[1] == True:
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                if reg1 == reg2:
+                    # Take branch
+                    self.program_counter = self.inst_mem.label_indeces[instruction.label]
+                
+                # Don't forget to clear the IF stage and remove this instruction from the pipeline
+                self.IF = Instruction("NULL")
+                self.update_stop_cycle(instruction.instruction_id, 1)
+                self.ID = Instruction("NULL")
+        
+        elif instruction.op_code == "BNE":
+            flags = [False, False]
+            
+            # First checks if either registers are currently in self.forwarding
+            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding):
+                # Forwarding not yet ready for first operand
+                if flag_1 and self.forwarding[instruction.operands[0]] == "None":
+                    is_ready = False
+                else:
+                    flags[0] = True # Take data from forwarding unit instead
+                
+                # Forwarding not yet ready for second operand
+                if flag_2 and self.forwarding[instruction.operands[1]] == "None":
+                    is_ready = False
+                else:
+                    flags[1] = True # Take data from forwarding unit instead
+            
+            # If both registers are ready, then check for "not equal"
+            if is_ready:
+                reg1 = self.registers[get_reg_num(instruction.operands[0])]
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                if flags[0] == True:
+                    reg1 = Register()
+                    reg1.insert_data(self.forwarding[instruction.operands[0]])
+                
+                if flags[1] == True:
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                if reg1 != reg2:
+                    # Take branch
+                    self.program_counter = self.inst_mem.label_indeces[instruction.label]
+                
+                # Don't forget to clear the IF stage and remove this instruction from the pipeline
+                self.IF = Instruction("NULL")
+                self.update_stop_cycle(instruction.instruction_id, 1)
+                self.ID = Instruction("NULL")
+        
+        elif instruction.op_code == "LI":
+            # First checks if register is currently in self.forwarding
+            if flag_1 := instruction.operands[0] in self.forwarding:
+                # Forwarding not yet ready for first operand
+                if flag_1 and self.forwarding[instruction.operands[0]] == "None":
+                    is_ready = False
+            
+            # If register is ready, then simply load immediate into register
+            if self.EX[0].is_null() and is_ready:
+                # Initialize register in forwarding unit
+                self.forwarding[instruction.operands[0]] = "None"
+
+                # Puts resulting data into buffer
+                self.buffer.append((instruction.operands[0], int(instruction.operands[1])))
+        
+        elif instruction.op_code == "HLT":
+            self.HLT_ID = True
+
+            self.update_stop_cycle(instruction.instruction_id, 1)
+
+            # HLT instruction doesn't get to continue to the next stage
+            self.ID = Instruction("NULL")
+        
+        
+        # Every other other instruction just has to check if all registers involved in the instruction are currently in the forwarding unit
+
+        # REG   DISP
+        elif instruction.op_code in ("LW", "SW"):
+            # First check if either registers are currently in self.forwarding
+            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 :=  get_reg_substring(instruction.operands[1]) in self.forwarding):
+                # Forwarding not yet ready for first operand
+                if flag_1 and self.forwarding[instruction.operands[0]] == "None":
+                    is_ready = False
+                
+                # Forwarding not yet ready for second operand
+                if flag_2 and self.forwarding[get_reg_substring(instruction.operands[1])] == "None":
+                    is_ready = False
+            
+            # If both registers are ready, then initialize all registers in self.forwarding
+            if self.EX[0].is_null() and is_ready:
+                # Initializes registers in forwarding unit
+                self.forwarding[instruction.operands[0]] = "None"
+                self.forwarding[get_reg_substring(instruction.operands[1])] = "None"
+        
+        # REG   REG   REG
+        elif instruction.op_code in ("AND", "OR", "ADD", "SUB", "MULT"):
+            # First check if either registers are currently in self.forwarding
+            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding) or (flag_3 := instruction.operands[2] in self.forwarding):
+                # Forwarding not yet ready for first operand
+                if flag_1 and self.forwarding[instruction.operands[0]] == "None":
+                    is_ready = False
+                
+                # Forwarding not yet ready for second operand
+                if flag_2 and self.forwarding[instruction.operands[1]] == "None":
+                    is_ready = False
+                
+                # Forwarding not yet ready for third operand
+                if flag_3 and self.forwarding[instruction.operands[2]] == "None":
+                    is_ready = False
+            
+            # If all registers are ready, then initialize all registers in self.forwarding
+            if self.EX[0].is_null() and is_ready:
+                # Initializes registers in forwarding unit
+                self.forwarding[instruction.operands[0]] = "None"
+                self.forwarding[instruction.operands[1]] = "None"
+                self.forwarding[instruction.operands[2]] = "None"
+        
+        # REG   REG   IMM
+        elif instruction.op_code in ("ANDI", "ORI", "ADDI", "SUBI", "MULTI"):
+            # First check if either registers are currently in self.forwarding
+            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding):
+                # Forwarding not yet ready for first operand
+                if flag_1 and self.forwarding[instruction.operands[0]] == "None":
+                    is_ready = False
+                
+                # Forwarding not yet ready for second operand
+                if flag_2 and self.forwarding[instruction.operands[1]] == "None":
+                    is_ready = False
+            
+            # If all registers are ready, then initialize all registers in self.forwarding
+            if self.EX[0].is_null() and is_ready:
+                # Initializes registers in forwarding unit
+                self.forwarding[instruction.operands[0]] = "None"
+                self.forwarding[instruction.operands[1]] = "None"
 
         # Move instruction to the next stage (if possible)
-        if self.EX[0].is_null():
+        if self.EX[0].is_null() and is_ready:
             # Record exit cycle for this instruction
             self.update_stop_cycle(instruction.instruction_id, 1)
             
@@ -145,6 +326,8 @@ class Processor:
         if self.inst_mem.miss_cycles_left > 0:
             print("I-Cache Miss STALL")
             self.inst_mem.miss_cycles_left -= 1
+            if self.inst_mem.miss_cycles_left == 0:
+                self.in_cache_miss = False
         elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == True:
             print("I-Cache Hit!")
             self.inst_mem.num_inst_cache_hits += 1
@@ -156,6 +339,7 @@ class Processor:
             print("I-Cache Miss")
             self.inst_mem.put_instruction_in_cache(self.program_counter)
             self.inst_mem.miss_cycles_left = 9
+            self.in_cache_miss = True
             self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
         else:
             self.IF = Instruction("NULL")
