@@ -80,13 +80,13 @@ class Processor:
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
-                else:
+                elif instruction.operands[0] in self.forwarding:
                     flags[0] = True # Take data from forwarding unit instead
                 
                 # Forwarding not yet ready for second operand
                 if flag_2 and self.forwarding[instruction.operands[1]] == "None":
                     is_ready = False
-                else:
+                elif instruction.operands[1] in self.forwarding:
                     flags[1] = True # Take data from forwarding unit instead
             
             # If both registers are ready, then check for "equal"
@@ -121,13 +121,13 @@ class Processor:
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
-                else:
+                elif instruction.operands[0] in self.forwarding:
                     flags[0] = True # Take data from forwarding unit instead
                 
                 # Forwarding not yet ready for second operand
                 if flag_2 and self.forwarding[instruction.operands[1]] == "None":
                     is_ready = False
-                else:
+                elif instruction.operands[1] in self.forwarding:
                     flags[1] = True # Take data from forwarding unit instead
             
             # If both registers are ready, then check for "not equal"
@@ -505,6 +505,8 @@ class Processor:
                     # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache
                     elif self.in_cache_miss == True and self.data_cache.miss_cycles_left > 0:
                         self.data_cache.miss_cycles_left -= 1
+                        if self.data_cache.miss_cycles_left == 0:
+                            self.in_cache_miss = False
                     
                     # If it's actually because it's waiting for I-Cache miss to resolve, then just wait
                     elif self.in_cache_miss == True and self.data_cache.miss_cycles_left == 0:
@@ -550,6 +552,8 @@ class Processor:
                     # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache
                     elif self.in_cache_miss == True and self.data_cache.miss_cycles_left > 0:
                         self.data_cache.miss_cycles_left -= 1
+                        if self.data_cache.miss_cycles_left == 0:
+                            self.in_cache_miss = False
                     
                     # If it's actually because it's waiting for I-Cache miss to resolve, then just wait
                     elif self.in_cache_miss == True and self.data_cache.miss_cycles_left == 0:
@@ -579,7 +583,8 @@ class Processor:
         
         elif instruction.op_code == "LW":
             # Basically does the same thing as SW except it also updates the register
-            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+            if instruction.operands[0] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
 
             # Remove registers from forwarding (if they aren't currently in the process of being updated again)
             if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
@@ -590,7 +595,8 @@ class Processor:
         
         elif instruction.op_code == "LI":
             # Updates registers
-            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+            if instruction.operands[0] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
 
             # Remove registers
             if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
@@ -598,9 +604,12 @@ class Processor:
         
         elif instruction.op_code in ("ADD", "SUB", "AND", "OR", "MULT"):
             # Updates registers
-            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
-            self.registers[get_reg_num(instruction.operands[1])].insert_data(self.forwarding[instruction.operands[1]])
-            self.registers[get_reg_num(instruction.operands[2])].insert_data(self.forwarding[instruction.operands[2]])
+            if instruction.operands[0] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+            if instruction.operands[1] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[1])].insert_data(self.forwarding[instruction.operands[1]])
+            if instruction.operands[2] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[2])].insert_data(self.forwarding[instruction.operands[2]])
 
             # Remove registers
             if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
@@ -612,8 +621,10 @@ class Processor:
         
         elif instruction.op_code in ("ADDI", "SUBI", "ANDI", "ORI", "BNE", "BEQ", "MULTI"):
             # Updates registers
-            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
-            self.registers[get_reg_num(instruction.operands[1])].insert_data(self.forwarding[instruction.operands[1]])
+            if instruction.operands[0] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+            if instruction.operands[1] in self.forwarding:
+                self.registers[get_reg_num(instruction.operands[1])].insert_data(self.forwarding[instruction.operands[1]])
 
             # Remove registers
             if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
@@ -687,6 +698,8 @@ class Processor:
         print(f"EX4 --> {self.EX[3].line}")
         print(f"MEM --> {self.MEM.line}")
         print(f"WB --> {self.WB.line}")
+        print(f"Program Counter: {self.program_counter}")
+        print(f"In Cache Miss: {self.in_cache_miss}")
         print(f"I-Cache Miss Cycles Left: {self.inst_mem.miss_cycles_left}")
         print(f"D-Cache Miss Cycles Left: {self.data_cache.miss_cycles_left}")
         print(f"Forwarding: {self.forwarding}")
@@ -695,7 +708,7 @@ class Processor:
             print(f"R{i} --> {self.registers[i].data}")
     
     def run(self):
-        SAFETY = 200 # Prevents infinite while loop
+        SAFETY = 75 # Prevents infinite while loop
         
         # Loading all instructions into the processor stage
         while (self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False) and self.cycle_num < SAFETY:
