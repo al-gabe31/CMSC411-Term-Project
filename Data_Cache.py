@@ -11,6 +11,16 @@ class Data_Cache:
         } # 2-way set four 4-word block cache
         self.miss_cycles_left = 0
         self.lru_indeces = [0, 0] # First index is for set0 and the second for set1
+        
+        self.used = {
+            "set0": [False, False],
+            "set1": [False, False]
+        }
+        
+        self.cache_to_data = {
+            "set0": [-1, -1],
+            "set1": [-1, -1]
+        } # Records the line_index of each block to the data's memory
 
         # IMPORTANT DATA FOR output.txt
         self.num_access_requests = 0
@@ -129,17 +139,32 @@ class Data_Cache:
         else:
             set_string = "set1"
 
-        # Adds 4 data into cache
-        for i in range(4):
-            # Index not out of range
-            if line_index + i < len(self.data):
-                self.cache[set_string][self.lru_indeces[set_number]][i].update(self.data[line_index + i].data_decimal)
-            else:
-                self.cache[set_string][self.lru_indeces[set_number]][i].update(0)
-        
-        # Update LRU block index
-        self.lru_indeces[set_number] += 1
-        self.lru_indeces[set_number] %= 2
+        if self.used[set_string][self.lru_indeces[set_number]] == False:
+            self.cache_to_data[set_string][self.lru_indeces[set_number]] = line_index
+            
+            # Adds 4 data into cache
+            for i in range(4):
+                # Index not out of range
+                if line_index + i < len(self.data):
+                    self.cache[set_string][self.lru_indeces[set_number]][i].update(self.data[line_index + i].data_decimal)
+                else:
+                    self.cache[set_string][self.lru_indeces[set_number]][i].update(0)
+            
+            self.used[set_string][self.lru_indeces[set_number]] = True
+            
+            # Update LRU block index
+            self.lru_indeces[set_number] += 1
+            self.lru_indeces[set_number] %= 2
+        else:
+            # We first have to clear that block in the cache
+            print("Clearing blocks in D-Cache")
+            
+            for i in range(4):
+                self.data[self.cache_to_data[set_string][self.lru_indeces[set_number]] + i] = self.cache[set_string][self.lru_indeces[set_number]][i]
+            
+            self.miss_cycles_left = 11
+            self.used[set_string][self.lru_indeces[set_number]] = False
+            return -2 # Indicating a D-Cache stall where you had to clear data in the cache
     
     # Updates data from cache and in memory
     def update_data_in_cache(self, address, new_value):

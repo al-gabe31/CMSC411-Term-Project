@@ -86,3 +86,14 @@ def get_reg_substring(disp_operand):
         return disp_operand[left_index + 1: right_index]
     
     return ""
+
+def get_disp_value(operand):
+    if get_operand_type(operand) == 2:
+        # Valid input
+        
+        left_index = operand.index("(")
+        
+        return int(operand[:left_index])
+    
+    else:
+        return None

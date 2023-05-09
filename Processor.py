@@ -74,7 +74,9 @@ class Processor:
             flags = [False, False]
             
             # First checks if either registers are currently in self.forwarding
-            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding):
+            flag_1 = instruction.operands[0] in self.forwarding
+            flag_2 = instruction.operands[1] in self.forwarding
+            if (flag_1) or (flag_2):
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
@@ -113,7 +115,9 @@ class Processor:
             flags = [False, False]
             
             # First checks if either registers are currently in self.forwarding
-            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding):
+            flag_1 = instruction.operands[0] in self.forwarding
+            flag_2 = instruction.operands[1] in self.forwarding
+            if (flag_1) or (flag_2):
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
@@ -150,7 +154,9 @@ class Processor:
         
         elif instruction.op_code == "LI":
             # First checks if register is currently in self.forwarding
-            if flag_1 := instruction.operands[0] in self.forwarding:
+            flag_1 = instruction.operands[0] in self.forwarding
+            
+            if flag_1:
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
@@ -158,7 +164,8 @@ class Processor:
             # If register is ready, then simply load immediate into register
             if self.EX[0].is_null() and is_ready:
                 # Initialize register in forwarding unit
-                self.forwarding[instruction.operands[0]] = "None"
+                if instruction.operands[0] not in self.forwarding:
+                    self.forwarding[instruction.operands[0]] = "None"
 
                 # Puts resulting data into buffer
                 self.buffer.append((instruction.operands[0], int(instruction.operands[1])))
@@ -177,7 +184,10 @@ class Processor:
         # REG   DISP
         elif instruction.op_code in ("LW", "SW"):
             # First check if either registers are currently in self.forwarding
-            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 :=  get_reg_substring(instruction.operands[1]) in self.forwarding):
+            flag_1 = instruction.operands[0] in self.forwarding
+            flag_2 = get_reg_substring(instruction.operands[1]) in self.forwarding
+            
+            if (flag_1) or (flag_2):
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
@@ -189,13 +199,19 @@ class Processor:
             # If both registers are ready, then initialize all registers in self.forwarding
             if self.EX[0].is_null() and is_ready:
                 # Initializes registers in forwarding unit
-                self.forwarding[instruction.operands[0]] = "None"
-                self.forwarding[get_reg_substring(instruction.operands[1])] = "None"
+                if instruction.operands[0] not in self.forwarding:
+                    self.forwarding[instruction.operands[0]] = "None"
+                if get_reg_substring(instruction.operands[1]) not in self.forwarding:
+                    self.forwarding[get_reg_substring(instruction.operands[1])] = "None"
         
         # REG   REG   REG
         elif instruction.op_code in ("AND", "OR", "ADD", "SUB", "MULT"):
             # First check if either registers are currently in self.forwarding
-            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding) or (flag_3 := instruction.operands[2] in self.forwarding):
+            flag_1 = instruction.operands[0] in self.forwarding
+            flag_2 = instruction.operands[1] in self.forwarding
+            flag_3 = instruction.operands[2] in self.forwarding
+            
+            if (flag_1) or (flag_2) or (flag_3):
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
@@ -211,14 +227,20 @@ class Processor:
             # If all registers are ready, then initialize all registers in self.forwarding
             if self.EX[0].is_null() and is_ready:
                 # Initializes registers in forwarding unit
-                self.forwarding[instruction.operands[0]] = "None"
-                self.forwarding[instruction.operands[1]] = "None"
-                self.forwarding[instruction.operands[2]] = "None"
+                if instruction.operands[0] not in self.forwarding:
+                    self.forwarding[instruction.operands[0]] = "None"
+                if instruction.operands[1] not in self.forwarding:
+                    self.forwarding[instruction.operands[1]] = "None"
+                if instruction.operands[2] not in self.forwarding:
+                    self.forwarding[instruction.operands[2]] = "None"
         
         # REG   REG   IMM
         elif instruction.op_code in ("ANDI", "ORI", "ADDI", "SUBI", "MULTI"):
             # First check if either registers are currently in self.forwarding
-            if (flag_1 := instruction.operands[0] in self.forwarding) or (flag_2 := instruction.operands[1] in self.forwarding):
+            flag_1 = instruction.operands[0] in self.forwarding
+            flag_2 = instruction.operands[1] in self.forwarding
+            
+            if (flag_1) or (flag_2):
                 # Forwarding not yet ready for first operand
                 if flag_1 and self.forwarding[instruction.operands[0]] == "None":
                     is_ready = False
@@ -230,8 +252,10 @@ class Processor:
             # If all registers are ready, then initialize all registers in self.forwarding
             if self.EX[0].is_null() and is_ready:
                 # Initializes registers in forwarding unit
-                self.forwarding[instruction.operands[0]] = "None"
-                self.forwarding[instruction.operands[1]] = "None"
+                if instruction.operands[0] not in self.forwarding:
+                    self.forwarding[instruction.operands[0]] = "None"
+                if instruction.operands[1] not in self.forwarding:
+                    self.forwarding[instruction.operands[1]] = "None"
 
         # Move instruction to the next stage (if possible)
         if self.EX[0].is_null() and is_ready:
@@ -244,16 +268,138 @@ class Processor:
     def act_EX1(self, instruction):
         # Do something here
 
+
+        # Instructions that finish here:
+        #   - AND
+        #   - ANDI
+        #   - OR
+        #   - ORI
+
         # Move instruction to the next stage (if possible)
         if self.EX[1].is_null():
+            if instruction.op_code == "AND":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+                reg3 = self.registers[get_reg_num(instruction.operands[2])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+                
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
+                    reg3 = Register()
+                    reg3.insert_data(self.forwarding[instruction.operands[2]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], bitwise_AND(reg2, reg3)))
+            
+            elif instruction.op_code == "ANDI":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], bitwise_ANDI(reg2, int(instruction.operands[2]))))
+            
+            elif instruction.op_code == "OR":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+                reg3 = self.registers[get_reg_num(instruction.operands[2])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+                
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
+                    reg3 = Register()
+                    reg3.insert_data(self.forwarding[instruction.operands[2]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], bitwise_OR(reg2, reg3)))
+            
+            elif instruction.op_code == "ORI":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], bitwise_ORI(reg2, int(instruction.operands[2]))))
+            
             self.EX[1] = self.EX[0]
             self.EX[0] = Instruction("NULL")
     
     def act_EX2(self, instruction):
         # Do something here
 
+
+        # Instructions that finish here:
+        #   - ADD
+        #   - ADDI
+        #   - SUB
+        #   - SUBI
+
         # Move instruction to the next stage (if possible)
         if self.EX[2].is_null():
+            if instruction.op_code == "ADD":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+                reg3 = self.registers[get_reg_num(instruction.operands[2])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+                
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
+                    reg3 = Register()
+                    reg3.insert_data(self.forwarding[instruction.operands[2]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], reg2.data + reg3.data))
+            
+            elif instruction.op_code == "ADDI":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], reg2.data + int(instruction.operands[2])))
+            
+            elif instruction.op_code == "SUB":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+                reg3 = self.registers[get_reg_num(instruction.operands[2])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+                
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
+                    reg3 = Register()
+                    reg3.insert_data(self.forwarding[instruction.operands[2]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], reg2.data - reg3.data))
+            
+            elif instruction.op_code == "SUBI":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], reg2.data - int(instruction.operands[2])))
+            
             self.EX[2] = self.EX[1]
             self.EX[1] = Instruction("NULL")
     
@@ -268,8 +414,40 @@ class Processor:
     def act_EX4(self, instruction):
         # Do something here
 
+
+        # Instructions that finish here:
+        #   - MULT
+        #   - MULTI
+
         # Move instruction to the next stage (if possible)
         if self.MEM.is_null():
+            if instruction.op_code == "MULT":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+                reg3 = self.registers[get_reg_num(instruction.operands[2])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+                
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
+                    reg3 = Register()
+                    reg3.insert_data(self.forwarding[instruction.operands[2]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], reg2.data * reg3.data))
+
+            elif instruction.op_code == "MULTI":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+
+                # Check if forwarding is needed
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                    reg2 = Register()
+                    reg2.insert_data(self.forwarding[instruction.operands[1]])
+
+                # Put result into buffer
+                self.buffer.append((instruction.operands[0], reg2.data * int(instruction.operands[2])))
+            
             # Record exit cycle for this instruction
             self.update_stop_cycle(instruction.instruction_id, 2)
             
@@ -279,16 +457,167 @@ class Processor:
     def act_MEM(self, instruction):
         # Do something here
 
+
+        # The only instructions that are relevant here are:
+        #   - LW
+        #   - SW
+
         # Move instruction to the next stage (if possible)
         if self.WB.is_null():
-            # Record exit cycle for this instruction
-            self.update_stop_cycle(instruction.instruction_id, 3)
+            is_ready = True
             
-            self.WB = self.MEM
-            self.MEM = Instruction("NULL")
+            if instruction.op_code == "LW":
+                reg2 = self.registers[get_reg_num(instruction.operands[1])]
+                mem_address = get_disp_value(instruction.operands[1]) + reg2.data
+                
+                # We then validate the mem_address
+                if mem_address < 256 or mem_address >= 384:
+                    print("ERROR IN LW - mem_address out of bounds")
+                    return -1
+                
+                line_index = mem_address - 256 # Since data starts at address 0x100
+                line_index /= 4 # Has to be word aligned
+                line_index = int(line_index)
+
+                base_data = self.data_cache.data[line_index].data_decimal
+                
+                # First checks if data is currentl in D-Cache
+                if self.data_cache.data_in_cache(base_data):
+                    # D-Cache Hit
+                    # Put resulting data into buffer
+                    self.buffer.append((instruction.operands[0], base_data))
+                else:
+                    # D-Cache Miss
+                    is_ready = False
+                    
+                    # We then check if the processor is currently dealing with I-Cache Miss
+                    if self.in_cache_miss == False and self.data_cache.miss_cycles_left == 0:
+                        # If it's not, then continue with D-Cache miss protocol
+                        
+                        result = self.data_cache.put_data_in_cache(mem_address)
+
+                        if result != -2:
+                            self.data_cache.miss_cycles_left = 11
+                            self.in_cache_miss = True
+
+                    # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache
+                    elif self.in_cache_miss == True and self.data_cache.miss_cycles_left > 0:
+                        self.data_cache.miss_cycles_left -= 1
+                    
+                    # If it's actually because it's waiting for I-Cache miss to resolve, then just wait
+                    elif self.in_cache_miss == True and self.data_cache.miss_cycles_left == 0:
+                        pass # Do nothing
+                    
+                    # This is just here just in case something unexpected happens
+                    else:
+                        print("ERROR IN LW - Uknown case happened")
+            
+            elif instruction.op_code == "SW":
+                reg3 = self.registers[instruction.operands[0]]
+                reg4 = self.registers[get_reg_num(instruction.operands[1])]
+                mem_address = get_disp_value(instruction.operands[1]) + reg4
+
+                # We then validate the mem_address
+                if mem_address < 256 or mem_address >= 384:
+                    print("ERROR IN SW - mem_address out of bounds")
+                    return -1
+                
+                line_index = mem_address - 256 # Since data starts at address 0x100
+                line_index /= 4 # Has to be word aligned
+                line_index = int(line_index)
+
+                base_data = self.data_cache.data[line_index].data_decimal
+
+                if self.data_cache.data_in_cache(base_data):
+                    # Data is currently located in cache and we just update it from there
+                    self.data_cache.update_data_in_cache(mem_address, reg3.data)
+                else:
+                    # We have to get data from cache and update it from there
+                    is_ready = False
+
+                    # We then check if the processor is currently dealing with I-Cache Miss
+                    if self.in_cache_miss == False and self.data_cache.miss_cycles_left == 0:
+                        # If it's not, then continue with D-Cache miss protocol
+                        
+                        result = self.data_cache.put_data_in_cache(mem_address)
+
+                        if result != -2:
+                            self.data_cache.miss_cycles_left = 11
+                            self.in_cache_miss = True
+                    
+                    # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache
+                    elif self.in_cache_miss == True and self.data_cache.miss_cycles_left > 0:
+                        self.data_cache.miss_cycles_left -= 1
+                    
+                    # If it's actually because it's waiting for I-Cache miss to resolve, then just wait
+                    elif self.in_cache_miss == True and self.data_cache.miss_cycles_left == 0:
+                        pass # Do nothing
+                    
+                    # This is just here just in case something unexpected happens
+                    else:
+                        print("ERROR IN LW - Uknown case happened")
+            
+            if is_ready:
+                # Record exit cycle for this instruction
+                self.update_stop_cycle(instruction.instruction_id, 3)
+                
+                self.WB = self.MEM
+                self.MEM = Instruction("NULL")
     
     def act_WB(self, instruction):
         # Do something here
+
+        if instruction.op_code == "SW":
+            # All it does is remove the registers from the forwarding unit (so long as the value in the dictionary isn't currently "None")
+            if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
+                self.forwarding.pop(instruction.operands[0], None)
+
+            if get_reg_substring(instruction.operands[1]) in self.forwarding and self.forwarding[get_reg_substring(instruction.operands[1])] != "None":
+                self.forwarding.pop(get_reg_substring(instruction.operands[1]))
+        
+        elif instruction.op_code == "LW":
+            # Basically does the same thing as SW except it also updates the register
+            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+
+            # Remove registers from forwarding (if they aren't currently in the process of being updated again)
+            if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
+                self.forwarding.pop(instruction.operands[0], None)
+
+            if get_reg_substring(instruction.operands[1]) in self.forwarding and self.forwarding[get_reg_substring(instruction.operands[1])] != "None":
+                self.forwarding.pop(get_reg_substring(instruction.operands[1]))
+        
+        elif instruction.op_code == "LI":
+            # Updates registers
+            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+
+            # Remove registers
+            if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
+                self.forwarding.pop(instruction.operands[0], None)
+        
+        elif instruction.op_code in ("ADD", "SUB", "AND", "OR", "MULT"):
+            # Updates registers
+            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+            self.registers[get_reg_num(instruction.operands[1])].insert_data(self.forwarding[instruction.operands[1]])
+            self.registers[get_reg_num(instruction.operands[2])].insert_data(self.forwarding[instruction.operands[2]])
+
+            # Remove registers
+            if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
+                self.forwarding.pop(instruction.operands[0], None)
+            if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                self.forwarding.pop(instruction.operands[1], None)
+            if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
+                self.forwarding.pop(instruction.operands[2], None)
+        
+        elif instruction.op_code in ("ADDI", "SUBI", "ANDI", "ORI", "BNE", "BEQ", "MULTI"):
+            # Updates registers
+            self.registers[get_reg_num(instruction.operands[0])].insert_data(self.forwarding[instruction.operands[0]])
+            self.registers[get_reg_num(instruction.operands[1])].insert_data(self.forwarding[instruction.operands[1]])
+
+            # Remove registers
+            if instruction.operands[0] in self.forwarding and self.forwarding[instruction.operands[0]] != "None":
+                self.forwarding.pop(instruction.operands[0], None)
+            if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] != "None":
+                self.forwarding.pop(instruction.operands[1], None)
 
         # Remove instruction from the pipeline
         # Record exit cycle for this instruction
@@ -336,11 +665,14 @@ class Processor:
             self.instructions.append(self.IF)
             self.program_counter += 1
         elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False:
-            print("I-Cache Miss")
-            self.inst_mem.put_instruction_in_cache(self.program_counter)
-            self.inst_mem.miss_cycles_left = 9
-            self.in_cache_miss = True
-            self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
+            if self.in_cache_miss == False:
+                print("I-Cache Miss")
+                self.inst_mem.put_instruction_in_cache(self.program_counter)
+                self.inst_mem.miss_cycles_left = 9
+                self.in_cache_miss = True
+                self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
+            else:
+                print("Waiting for D-Cache Miss to Resolve")
         else:
             self.IF = Instruction("NULL")
     
@@ -353,12 +685,13 @@ class Processor:
         print(f"EX4 --> {self.EX[3].line}")
         print(f"MEM --> {self.MEM.line}")
         print(f"WB --> {self.WB.line}")
+        print(f"Forwarding: {self.forwarding}")
     
     def run(self):
         SAFETY = 200 # Prevents infinite while loop
         
         # Loading all instructions into the processor stage
-        while self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False and self.cycle_num < SAFETY:
+        while (self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False) and self.cycle_num < SAFETY:
             print(f"CYCLE {self.cycle_num}")
 
             # Gets all tuples currently in self.buffer and puts it into self.forwarding
