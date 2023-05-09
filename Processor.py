@@ -39,14 +39,17 @@ class Processor:
     
     def act_IF(self, instruction):
         # Do something here
-        if instruction.is_null() == False:
-            print("Accessing from I-Cache")
-            self.inst_mem.num_access_requests += 1
+        # if instruction.is_null() == False:
+        #     print("Accessing from I-Cache")
+        #     self.inst_mem.num_access_requests += 1
 
         # Move instruction to the next stage (if possible)
         if self.ID.is_null() and self.inst_mem.miss_cycles_left == 0:
             # Record exit cycle for this instruction
             self.update_stop_cycle(instruction.instruction_id, 0)
+
+            if instruction.op_code == "HLT" and self.HLT_ID == True:
+                self.IF = Instruction("NULL")
             
             self.ID = self.IF
             self.IF = Instruction("NULL")
@@ -103,11 +106,11 @@ class Processor:
                     reg2.insert_data(self.forwarding[instruction.operands[1]])
 
                 if reg1 == reg2:
-                    # Take branch
+                    # Take branch and clear instruction in IF stage
                     self.program_counter = self.inst_mem.label_indeces[instruction.label]
+                    self.IF = Instruction("NULL")
                 
-                # Don't forget to clear the IF stage and remove this instruction from the pipeline
-                self.IF = Instruction("NULL")
+                # Don't forget to remove this instruction from the pipeline
                 self.update_stop_cycle(instruction.instruction_id, 1)
                 self.ID = Instruction("NULL")
         
@@ -144,11 +147,11 @@ class Processor:
                     reg2.insert_data(self.forwarding[instruction.operands[1]])
 
                 if reg1 != reg2:
-                    # Take branch
+                    # Take branch and clear instruction in IF stage
                     self.program_counter = self.inst_mem.label_indeces[instruction.label]
+                    self.IF = Instruction("NULL")
                 
-                # Don't forget to clear the IF stage and remove this instruction from the pipeline
-                self.IF = Instruction("NULL")
+                # Don't forget to remove this instruction from the pipeline
                 self.update_stop_cycle(instruction.instruction_id, 1)
                 self.ID = Instruction("NULL")
         
@@ -651,6 +654,47 @@ class Processor:
         
         # self.ID = self.IF
 
+        # UNCOMMENT THIS LATER IF NEEDED
+        # self.act_WB(self.WB)
+        # self.act_MEM(self.MEM)
+        # self.act_EX4(self.EX[3])
+        # self.act_EX3(self.EX[2])
+        # self.act_EX2(self.EX[1])
+        # self.act_EX1(self.EX[0])
+        # self.act_ID(self.ID)
+        # self.act_IF(self.IF)
+
+        # if len(self.inst_mem.instructions) > 0:
+        #     self.IF = self.inst_mem.instructions.pop(0)
+        # else:
+        #     self.IF = Instruction("NULL")
+
+        if self.IF.is_null():
+            if self.inst_mem.miss_cycles_left > 0:
+                print("I-Cache Miss STALL")
+                self.inst_mem.miss_cycles_left -= 1
+                if self.inst_mem.miss_cycles_left == 0:
+                    self.in_cache_miss = False
+            elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == True:
+                print("I-Cache Hit!")
+                self.inst_mem.num_access_requests += 1
+                self.inst_mem.num_inst_cache_hits += 1
+                self.IF = deepcopy(self.inst_mem.instructions[self.program_counter])
+                self.IF.instruction_id = self.cycle_num
+                self.instructions.append(self.IF)
+                self.program_counter += 1
+            elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False:
+                if self.in_cache_miss == False:
+                    print("I-Cache Miss")
+                    self.inst_mem.put_instruction_in_cache(self.program_counter)
+                    self.inst_mem.miss_cycles_left = 10
+                    self.in_cache_miss = True
+                    self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
+                else:
+                    print("Waiting for D-Cache Miss to Resolve")
+            else:
+                self.IF = Instruction("NULL")
+        
         self.act_WB(self.WB)
         self.act_MEM(self.MEM)
         self.act_EX4(self.EX[3])
@@ -659,35 +703,6 @@ class Processor:
         self.act_EX1(self.EX[0])
         self.act_ID(self.ID)
         self.act_IF(self.IF)
-
-        # if len(self.inst_mem.instructions) > 0:
-        #     self.IF = self.inst_mem.instructions.pop(0)
-        # else:
-        #     self.IF = Instruction("NULL")
-
-        if self.inst_mem.miss_cycles_left > 0:
-            print("I-Cache Miss STALL")
-            self.inst_mem.miss_cycles_left -= 1
-            if self.inst_mem.miss_cycles_left == 0:
-                self.in_cache_miss = False
-        elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == True:
-            print("I-Cache Hit!")
-            self.inst_mem.num_inst_cache_hits += 1
-            self.IF = deepcopy(self.inst_mem.instructions[self.program_counter])
-            self.IF.instruction_id = self.cycle_num
-            self.instructions.append(self.IF)
-            self.program_counter += 1
-        elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False:
-            if self.in_cache_miss == False:
-                print("I-Cache Miss")
-                self.inst_mem.put_instruction_in_cache(self.program_counter)
-                self.inst_mem.miss_cycles_left = 9
-                self.in_cache_miss = True
-                self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
-            else:
-                print("Waiting for D-Cache Miss to Resolve")
-        else:
-            self.IF = Instruction("NULL")
     
     def display_curr_state(self):
         print(f"IF --> {self.IF.line}")

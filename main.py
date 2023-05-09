@@ -55,7 +55,7 @@ print(f"Number of D-Cache hits --> {p1.data_cache.num_data_cache_hits}")
 print([instruction.op_code for instruction in p1.inst_mem.cache[2]])
 print("\n\n")
 for instruction in p1.instructions:
-    print(f"Instruction ID {instruction.instruction_id} finished stages at cycles {instruction.cycle_stops}")
+    print(f"Instruction {instruction.op_code} finished stages at cycles {instruction.cycle_stops}")
 
 
 
