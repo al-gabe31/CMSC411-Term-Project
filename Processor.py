@@ -505,7 +505,7 @@ class Processor:
                         result = self.data_cache.put_data_in_cache(mem_address)
 
                         if result != -2:
-                            self.data_cache.miss_cycles_left = 11
+                            self.data_cache.miss_cycles_left = 12
                             self.in_cache_miss = True
 
                     # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache
@@ -552,7 +552,7 @@ class Processor:
                         result = self.data_cache.put_data_in_cache(mem_address)
 
                         if result != -2:
-                            self.data_cache.miss_cycles_left = 11
+                            self.data_cache.miss_cycles_left = 12
                             self.in_cache_miss = True
                     
                     # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache

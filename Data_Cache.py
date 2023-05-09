@@ -162,7 +162,7 @@ class Data_Cache:
             for i in range(4):
                 self.data[self.cache_to_data[set_string][self.lru_indeces[set_number]] + i] = self.cache[set_string][self.lru_indeces[set_number]][i]
             
-            self.miss_cycles_left = 11
+            self.miss_cycles_left = 12
             self.used[set_string][self.lru_indeces[set_number]] = False
             return -2 # Indicating a D-Cache stall where you had to clear data in the cache
     
