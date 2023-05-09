@@ -1,2 +1,1 @@
-(index) == False:
-        print("I-Cache Miss")
+r

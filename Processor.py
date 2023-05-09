@@ -433,6 +433,8 @@ class Processor:
                 if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] != "None":
                     reg3 = Register()
                     reg3.insert_data(self.forwarding[instruction.operands[2]])
+                
+                print(f"{reg2.data * reg3.data} = {reg2.data} * {reg3.data}")
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data * reg3.data))
@@ -482,7 +484,7 @@ class Processor:
                 base_data = self.data_cache.data[line_index].data_decimal
                 
                 # First checks if data is currentl in D-Cache
-                if self.data_cache.data_in_cache(base_data):
+                if self.data_cache.data_in_cache(base_data) and self.data_cache.miss_cycles_left == 0:
                     # D-Cache Hit
                     # Put resulting data into buffer
                     self.buffer.append((instruction.operands[0], base_data))
@@ -685,7 +687,12 @@ class Processor:
         print(f"EX4 --> {self.EX[3].line}")
         print(f"MEM --> {self.MEM.line}")
         print(f"WB --> {self.WB.line}")
+        print(f"I-Cache Miss Cycles Left: {self.inst_mem.miss_cycles_left}")
+        print(f"D-Cache Miss Cycles Left: {self.data_cache.miss_cycles_left}")
         print(f"Forwarding: {self.forwarding}")
+        print(f"Register Values:")
+        for i in range(0, 8):
+            print(f"R{i} --> {self.registers[i].data}")
     
     def run(self):
         SAFETY = 200 # Prevents infinite while loop
