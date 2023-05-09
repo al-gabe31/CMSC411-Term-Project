@@ -75,6 +75,7 @@ class Instruction:
         self.instruction_id = -1 # Helps differentiate between multiple clones of the same instruction
 
         # Parsing command starts here
+        line = line.replace("\t", " ") # Removes all tabs
         if line.find('\n') != -1: # Removes the '\n' at the end if it has one
             line = line[:line.find('\n')]
         adding = line.split(' ')

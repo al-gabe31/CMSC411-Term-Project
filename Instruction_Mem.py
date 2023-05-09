@@ -26,6 +26,7 @@ class Instruction_Mem:
         for i in range(len(self.instructions)):
             if self.instructions[i].is_valid() == False:
                 print(f"Invalid Arguments @ Line {i + 1}")
+                # print(self.instructions[i])
                 self.instructions.clear()
                 break
         

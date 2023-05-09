@@ -66,7 +66,7 @@ class Processor:
         #   - HLT
         # Everything else just puts things into the forwarding buffer
         if instruction.op_code == "J":
-            self.program_counter = self.inst_mem.label_indeces[instruction.label]
+            self.program_counter = self.inst_mem.label_indeces[instruction.operands[0]]
 
             # Don't forget to clear the IF stage and remove this instruction from the pipeline
             self.IF = Instruction("NULL")
@@ -107,7 +107,8 @@ class Processor:
 
                 if reg1 == reg2:
                     # Take branch and clear instruction in IF stage
-                    self.program_counter = self.inst_mem.label_indeces[instruction.label]
+                    self.program_counter = self.inst_mem.label_indeces[instruction.operands[2]]
+                    self.update_stop_cycle(self.IF.instruction_id, 0)
                     self.IF = Instruction("NULL")
                 
                 # Don't forget to remove this instruction from the pipeline
@@ -148,7 +149,8 @@ class Processor:
 
                 if reg1 != reg2:
                     # Take branch and clear instruction in IF stage
-                    self.program_counter = self.inst_mem.label_indeces[instruction.label]
+                    self.program_counter = self.inst_mem.label_indeces[instruction.operands[2]]
+                    self.update_stop_cycle(self.IF.instruction_id, 0)
                     self.IF = Instruction("NULL")
                 
                 # Don't forget to remove this instruction from the pipeline
@@ -523,9 +525,9 @@ class Processor:
                         print("ERROR IN LW - Uknown case happened")
             
             elif instruction.op_code == "SW":
-                reg3 = self.registers[instruction.operands[0]]
+                reg3 = self.registers[get_reg_num(instruction.operands[0])]
                 reg4 = self.registers[get_reg_num(instruction.operands[1])]
-                mem_address = get_disp_value(instruction.operands[1]) + reg4
+                mem_address = get_disp_value(instruction.operands[1]) + reg4.data
 
                 # We then validate the mem_address
                 if mem_address < 256 or mem_address >= 384:
@@ -540,6 +542,8 @@ class Processor:
 
                 if self.data_cache.data_in_cache(base_data):
                     # Data is currently located in cache and we just update it from there
+                    self.data_cache.num_access_requests += 1
+                    self.data_cache.num_data_cache_hits += 1
                     self.data_cache.update_data_in_cache(mem_address, reg3.data)
                 else:
                     # We have to get data from cache and update it from there
@@ -549,6 +553,7 @@ class Processor:
                     if self.in_cache_miss == False and self.data_cache.miss_cycles_left == 0:
                         # If it's not, then continue with D-Cache miss protocol
                         
+                        self.data_cache.num_data_cache_hits -= 1
                         result = self.data_cache.put_data_in_cache(mem_address)
 
                         if result != -2:
@@ -686,7 +691,7 @@ class Processor:
                 self.IF.instruction_id = self.cycle_num
                 self.instructions.append(self.IF)
                 self.program_counter += 1
-            elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False:
+            elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False and self.HLT_ID == False:
                 if self.in_cache_miss == False:
                     print("I-Cache Miss")
                     self.inst_mem.put_instruction_in_cache(self.program_counter)
