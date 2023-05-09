@@ -490,6 +490,8 @@ class Processor:
                 if self.data_cache.data_in_cache(base_data) and self.data_cache.miss_cycles_left == 0:
                     # D-Cache Hit
                     # Put resulting data into buffer
+                    self.data_cache.num_access_requests += 1
+                    self.data_cache.num_data_cache_hits += 1
                     self.buffer.append((instruction.operands[0], base_data))
                 else:
                     # D-Cache Miss
@@ -499,6 +501,7 @@ class Processor:
                     if self.in_cache_miss == False and self.data_cache.miss_cycles_left == 0:
                         # If it's not, then continue with D-Cache miss protocol
                         
+                        self.data_cache.num_data_cache_hits -= 1
                         result = self.data_cache.put_data_in_cache(mem_address)
 
                         if result != -2:

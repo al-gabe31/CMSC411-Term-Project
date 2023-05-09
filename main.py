@@ -52,7 +52,6 @@ print(f"Total requests for I-Cache --> {p1.inst_mem.num_access_requests}")
 print(f"Number of I-Cache hits --> {p1.inst_mem.num_inst_cache_hits}")
 print(f"Total requests for D-Cache --> {p1.data_cache.num_access_requests}")
 print(f"Number of D-Cache hits --> {p1.data_cache.num_data_cache_hits}")
-print([instruction.op_code for instruction in p1.inst_mem.cache[2]])
 print("\n\n")
 for instruction in p1.instructions:
     print(f"Instruction {instruction.op_code} finished stages at cycles {instruction.cycle_stops}")
