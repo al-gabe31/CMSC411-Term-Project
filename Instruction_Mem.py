@@ -26,7 +26,6 @@ class Instruction_Mem:
         for i in range(len(self.instructions)):
             if self.instructions[i].is_valid() == False:
                 print(f"Invalid Arguments @ Line {i + 1}")
-                # print(self.instructions[i])
                 self.instructions.clear()
                 break
         
@@ -72,13 +71,11 @@ class Instruction_Mem:
             # Index not out of range
             if line_index + i < len(self.instructions):
                 stuff = ", ".join(self.instructions[line_index + i].operands)
-                # idk = self.instructions[line_index + i].label + ":"
                 idk = ""
                 
                 if self.instructions[line_index + i].label != "":
                     idk = self.instructions[line_index + i].label + ":"
                 
-                # self.cache[self.curr_block_destination][i] = Instruction(self.instructions[line_index + i].line)
                 self.cache[self.curr_block_destination][i] = Instruction(f"{idk} {self.instructions[line_index + i].op_code} {stuff} {self.instructions[line_index + i].remarks}")
 
             else:

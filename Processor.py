@@ -39,9 +39,6 @@ class Processor:
     
     def act_IF(self, instruction):
         # Do something here
-        # if instruction.is_null() == False:
-        #     print("Accessing from I-Cache")
-        #     self.inst_mem.num_access_requests += 1
 
         # Move instruction to the next stage (if possible)
         if self.ID.is_null() and self.inst_mem.miss_cycles_left == 0:
@@ -701,32 +698,6 @@ class Processor:
     
     # Shifts all Instructions to their next stage
     def shift(self):
-        # self.WB = self.MEM
-
-        # # Execute stages of the processor (can get kinda tricky)
-        # self.MEM = self.EX[3]
-        # self.EX[3] = self.EX[2]
-        # self.EX[2] = self.EX[1]
-        # self.EX[1] = self.EX[0]
-        # self.EX[0] = self.ID
-        
-        # self.ID = self.IF
-
-        # UNCOMMENT THIS LATER IF NEEDED
-        # self.act_WB(self.WB)
-        # self.act_MEM(self.MEM)
-        # self.act_EX4(self.EX[3])
-        # self.act_EX3(self.EX[2])
-        # self.act_EX2(self.EX[1])
-        # self.act_EX1(self.EX[0])
-        # self.act_ID(self.ID)
-        # self.act_IF(self.IF)
-
-        # if len(self.inst_mem.instructions) > 0:
-        #     self.IF = self.inst_mem.instructions.pop(0)
-        # else:
-        #     self.IF = Instruction("NULL")
-
         if self.IF.is_null():
             print(f"HLT in IF --> {self.IF.op_code == 'HLT'}")
             print(f"HLT IN ID --> {self.ID.op_code == 'HLT'}")
@@ -854,8 +825,6 @@ class Processor:
             returner[6] = str(curr_instruction.cycle_stops[3]) + ""
         if curr_instruction.cycle_stops[4] != -1:
             returner[7] = str(curr_instruction.cycle_stops[4]) + ""
-        
-        # returner = "".join(returner)
 
         result = ""
 
