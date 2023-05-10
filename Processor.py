@@ -835,11 +835,12 @@ class Processor:
             result += " "
         
         # Add the End Cycles
-        for i in range(3, 8):
+        for i in range(3, 7):
             while len(returner[i]) < 8:
                 returner[i] += " "
             
             result += returner[i]
+        result += returner[7]
         
         return result
 
