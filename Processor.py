@@ -177,6 +177,7 @@ class Processor:
         
         elif instruction.op_code == "HLT":
             self.HLT_ID = True
+            print("HLT_ID now set to True")
 
             self.update_stop_cycle(instruction.instruction_id, 1)
 
@@ -297,6 +298,12 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], bitwise_AND(reg2, reg3)))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] == "None" and self.reg_in_buffer(instruction.operands[2]) == False:
+                    self.forwarding.pop(instruction.operands[2], None)
             
             elif instruction.op_code == "ANDI":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -308,6 +315,10 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], bitwise_ANDI(reg2, int(instruction.operands[2]))))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
             
             elif instruction.op_code == "OR":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -324,6 +335,12 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], bitwise_OR(reg2, reg3)))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] == "None" and self.reg_in_buffer(instruction.operands[2]) == False:
+                    self.forwarding.pop(instruction.operands[2], None)
             
             elif instruction.op_code == "ORI":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -335,6 +352,10 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], bitwise_ORI(reg2, int(instruction.operands[2]))))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
             
             self.EX[1] = self.EX[0]
             self.EX[0] = Instruction("NULL")
@@ -366,6 +387,12 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data + reg3.data))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] == "None" and self.reg_in_buffer(instruction.operands[2]) == False:
+                    self.forwarding.pop(instruction.operands[2], None)
             
             elif instruction.op_code == "ADDI":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -377,6 +404,10 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data + int(instruction.operands[2])))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
             
             elif instruction.op_code == "SUB":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -393,6 +424,12 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data - reg3.data))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] == "None" and self.reg_in_buffer(instruction.operands[2]) == False:
+                    self.forwarding.pop(instruction.operands[2], None)
             
             elif instruction.op_code == "SUBI":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -404,6 +441,10 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data - int(instruction.operands[2])))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
             
             self.EX[2] = self.EX[1]
             self.EX[1] = Instruction("NULL")
@@ -439,10 +480,15 @@ class Processor:
                     reg3 = Register()
                     reg3.insert_data(self.forwarding[instruction.operands[2]])
                 
-                print(f"{reg2.data * reg3.data} = {reg2.data} * {reg3.data}")
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data * reg3.data))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
+                if instruction.operands[2] in self.forwarding and self.forwarding[instruction.operands[2]] == "None" and self.reg_in_buffer(instruction.operands[2]) == False:
+                    self.forwarding.pop(instruction.operands[2], None)
 
             elif instruction.op_code == "MULTI":
                 reg2 = self.registers[get_reg_num(instruction.operands[1])]
@@ -454,6 +500,10 @@ class Processor:
 
                 # Put result into buffer
                 self.buffer.append((instruction.operands[0], reg2.data * int(instruction.operands[2])))
+
+                # Remove any registers that are no longer needed in forwarding
+                if instruction.operands[1] in self.forwarding and self.forwarding[instruction.operands[1]] == "None" and self.reg_in_buffer(instruction.operands[1]) == False:
+                    self.forwarding.pop(instruction.operands[1], None)
             
             # Record exit cycle for this instruction
             self.update_stop_cycle(instruction.instruction_id, 2)
@@ -540,7 +590,7 @@ class Processor:
 
                 base_data = self.data_cache.data[line_index].data_decimal
 
-                if self.data_cache.data_in_cache(base_data):
+                if self.data_cache.data_in_cache(base_data) and self.data_cache.miss_cycles_left == 0:
                     # Data is currently located in cache and we just update it from there
                     self.data_cache.num_access_requests += 1
                     self.data_cache.num_data_cache_hits += 1
@@ -557,7 +607,7 @@ class Processor:
                         result = self.data_cache.put_data_in_cache(mem_address)
 
                         if result != -2:
-                            self.data_cache.miss_cycles_left = 12
+                            self.data_cache.miss_cycles_left = 10
                             self.in_cache_miss = True
                     
                     # If it's currently dealing with a cache miss but it's from d-cache, then simply just decrement the miss cycles left for d-cache
@@ -572,7 +622,7 @@ class Processor:
                     
                     # This is just here just in case something unexpected happens
                     else:
-                        print("ERROR IN LW - Uknown case happened")
+                        print("ERROR IN SW - Uknown case happened")
             
             if is_ready:
                 # Record exit cycle for this instruction
@@ -678,6 +728,9 @@ class Processor:
         #     self.IF = Instruction("NULL")
 
         if self.IF.is_null():
+            print(f"HLT in IF --> {self.IF.op_code == 'HLT'}")
+            print(f"HLT IN ID --> {self.ID.op_code == 'HLT'}")
+            
             if self.inst_mem.miss_cycles_left > 0:
                 print("I-Cache Miss STALL")
                 self.inst_mem.miss_cycles_left -= 1
@@ -691,7 +744,7 @@ class Processor:
                 self.IF.instruction_id = self.cycle_num
                 self.instructions.append(self.IF)
                 self.program_counter += 1
-            elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False and self.HLT_ID == False:
+            elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False and self.HLT_ID == False and self.ID.op_code != "HLT":
                 if self.in_cache_miss == False:
                     print("I-Cache Miss")
                     self.inst_mem.put_instruction_in_cache(self.program_counter)
@@ -711,6 +764,11 @@ class Processor:
         self.act_EX1(self.EX[0])
         self.act_ID(self.ID)
         self.act_IF(self.IF)
+
+        # Gets all tuples currently in self.buffer and puts it into self.forwarding
+        while(len(self.buffer) > 0):
+            self.forwarding[self.buffer[0][0]] = self.buffer[0][1]
+            self.buffer.pop(0)
     
     def display_curr_state(self):
         print(f"IF --> {self.IF.line}")
@@ -737,10 +795,6 @@ class Processor:
         while (self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False) and self.cycle_num < SAFETY:
             print(f"CYCLE {self.cycle_num}")
 
-            # Gets all tuples currently in self.buffer and puts it into self.forwarding
-            while(len(self.buffer) > 0):
-                self.forwarding[self.buffer[0][0]] = self.buffer[0][1]
-                self.buffer.pop(0)
             self.shift()
             self.display_curr_state()
             self.cycle_num += 1
@@ -764,3 +818,10 @@ class Processor:
         index = self.locate_instruction_id(instruction_id)
         if index in range(len(self.instructions)):
             self.instructions[index].cycle_stops[cycle_num] = self.cycle_num
+    
+    def reg_in_buffer(self, reg_string):
+        for pair in self.buffer:
+            if reg_string == pair[0]:
+                return True
+        
+        return False

@@ -1,13 +1,11 @@
-	LI 	R1, 16
-	LI	R3, 0
-	ADDI	R2, R3, 4
-	ADDI	R4, R3, 0
-	ADDI  R5, R3, 4
-	MULT 	R2, R2, R5
-	BEQ	R2, R1, END
-	ADD 	R4, R4, R2
-	ADDI 	R5, R5, 1
-END:	SW	R4, 256(R5)
-	LI	R6, 10
-	HLT	
-	HLT	
+        LI      R1, 256         # addr = 0x100;
+        LW      R3, 0(R1)       # boundary = *addr;
+        LI      R5, 1           # i = 1;
+        LI      R7, 0           # sum = 0;
+        LI      R6, 1           # factorial = 0x01;
+LOOP:   MULT    R6, R5, R6      # factorial *= I;
+        ADD     R7, R7, R6      # sum += factorial;
+        ADDI    R5, R5, 1       # i++;
+        BNE     R5, R3, LOOP
+        HLT
+        HLT
