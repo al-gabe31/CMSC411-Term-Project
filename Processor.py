@@ -800,6 +800,8 @@ class Processor:
             self.cycle_num += 1
             print("")
         
+        self.write_file()
+        
         # Finishing all instructions in the processor stage
     
     # Returns the index of a specific instruction by instruction_id in self.instructions
@@ -825,3 +827,46 @@ class Processor:
                 return True
         
         return False
+
+    def instruction_line_format(self, instruction_line):
+        curr_instruction = self.instructions[instruction_line]
+        returner = ["\t\t" for i in range(8)]
+        
+        # Label
+        if curr_instruction.label != "":
+            returner[0] = curr_instruction.label + ":\t"
+        
+        # Op Code
+        returner[1] = curr_instruction.op_code + "\t"
+        
+        # Operands
+        the_list = ", ".join(curr_instruction.operands)
+        returner[2] = the_list + "\t"
+        
+        # Ending Cycles
+        if curr_instruction.cycle_stops[0] != -1:
+            returner[3] = str(curr_instruction.cycle_stops[0]) + "\t\t"
+        if curr_instruction.cycle_stops[1] != -1:
+            returner[4] = str(curr_instruction.cycle_stops[1]) + "\t\t"
+        if curr_instruction.cycle_stops[2] != -1:
+            returner[5] = str(curr_instruction.cycle_stops[2]) + "\t\t"
+        if curr_instruction.cycle_stops[3] != -1:
+            returner[6] = str(curr_instruction.cycle_stops[3]) + "\t\t"
+        if curr_instruction.cycle_stops[4] != -1:
+            returner[7] = str(curr_instruction.cycle_stops[4]) + "\t\t"
+        
+        returner = "".join(returner)
+        return returner
+
+    # Writes the output.txt file
+    def write_file(self):
+        with open("output.txt", "w") as file:
+            file.write("Cycle Number for Each Stage\t\t\tIF\t\tID\t\tEX4\t\tMEM\t\tWB\n")
+
+            for i in range(len(self.inst_mem.instructions)):
+                file.write(f"{self.instruction_line_format(i)}\n")
+            
+            file.write(f"Total number of access requests for instruction cache: {self.inst_mem.num_access_requests}\n")
+            file.write(f"Number of instruction cache hits: {self.inst_mem.num_inst_cache_hits}\n")
+            file.write(f"Total number of access requests for data cache: {self.data_cache.num_access_requests}\n")
+            file.write(f"Number of data cache hits: {self.data_cache.num_data_cache_hits}\n")

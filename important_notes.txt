@@ -1,0 +1,6 @@
+Notes for output.txt
+
+- op_code starts after 8 spaces
+- operand starts after 16 spaces
+- end_cycles starts after 36 spaces (with 8 spaces in between)
+        - [36, 44, 52, 60, 68]
