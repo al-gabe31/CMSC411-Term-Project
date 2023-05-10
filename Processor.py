@@ -830,40 +830,65 @@ class Processor:
 
     def instruction_line_format(self, instruction_line):
         curr_instruction = self.instructions[instruction_line]
-        returner = ["\t\t" for i in range(8)]
+        returner = ["" for i in range(8)]
         
         # Label
         if curr_instruction.label != "":
-            returner[0] = curr_instruction.label + ":\t"
+            returner[0] = curr_instruction.label + ":"
         
         # Op Code
-        returner[1] = curr_instruction.op_code + "\t"
+        returner[1] = curr_instruction.op_code + ""
         
         # Operands
         the_list = ", ".join(curr_instruction.operands)
-        returner[2] = the_list + "\t"
+        returner[2] = the_list + ""
         
         # Ending Cycles
         if curr_instruction.cycle_stops[0] != -1:
-            returner[3] = str(curr_instruction.cycle_stops[0]) + "\t\t"
+            returner[3] = str(curr_instruction.cycle_stops[0]) + ""
         if curr_instruction.cycle_stops[1] != -1:
-            returner[4] = str(curr_instruction.cycle_stops[1]) + "\t\t"
+            returner[4] = str(curr_instruction.cycle_stops[1]) + ""
         if curr_instruction.cycle_stops[2] != -1:
-            returner[5] = str(curr_instruction.cycle_stops[2]) + "\t\t"
+            returner[5] = str(curr_instruction.cycle_stops[2]) + ""
         if curr_instruction.cycle_stops[3] != -1:
-            returner[6] = str(curr_instruction.cycle_stops[3]) + "\t\t"
+            returner[6] = str(curr_instruction.cycle_stops[3]) + ""
         if curr_instruction.cycle_stops[4] != -1:
-            returner[7] = str(curr_instruction.cycle_stops[4]) + "\t\t"
+            returner[7] = str(curr_instruction.cycle_stops[4]) + ""
         
-        returner = "".join(returner)
-        return returner
+        # returner = "".join(returner)
+
+        result = ""
+
+        # Add the Label
+        result += returner[0]
+        while len(result) < 8:
+            result += " "
+        
+        # Add the Op Code
+        result += returner[1]
+        while len(result) < 16:
+            result += " "
+        
+        # Add the Operands
+        result += returner[2]
+        while len(result) < 36:
+            result += " "
+        
+        # Add the End Cycles
+        for i in range(3, 8):
+            while len(returner[i]) < 8:
+                returner[i] += " "
+            
+            result += returner[i]
+        
+        return result
 
     # Writes the output.txt file
     def write_file(self):
         with open("output.txt", "w") as file:
             file.write("Cycle Number for Each Stage\t\t\tIF\t\tID\t\tEX4\t\tMEM\t\tWB\n")
 
-            for i in range(len(self.inst_mem.instructions)):
+            for i in range(len(self.instructions)):
                 file.write(f"{self.instruction_line_format(i)}\n")
             
             file.write(f"Total number of access requests for instruction cache: {self.inst_mem.num_access_requests}\n")
