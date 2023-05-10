@@ -129,7 +129,6 @@ class Data_Cache:
         base_data = self.data[line_index]
 
         if self.data_in_cache(base_data.data_decimal) == True:
-            print("ERROR - Can't put data in cache if it's already there")
             return -1 # Can't put data into cache if it's already there
         
         set_number = int(line_index / 4) % 2
@@ -157,8 +156,6 @@ class Data_Cache:
             self.lru_indeces[set_number] %= 2
         else:
             # We first have to clear that block in the cache
-            print("Clearing blocks in D-Cache")
-            
             for i in range(4):
                 self.data[self.cache_to_data[set_string][self.lru_indeces[set_number]] + i] = self.cache[set_string][self.lru_indeces[set_number]][i]
             
@@ -182,7 +179,6 @@ class Data_Cache:
         base_value = base_data.data_decimal
 
         if self.data_in_cache(base_data.data_decimal) == False:
-            print("ERROR - Can't update data in cache since it's not there")
             return -1 # Can't update data from cache if it's not there
         
         set_address = self.get_set_address(base_value)

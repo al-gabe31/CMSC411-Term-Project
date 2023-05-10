@@ -63,7 +63,6 @@ class Instruction_Mem:
             return -1 # Can't put during an instruction-cache miss
         
         if self.instruction_in_cache(line_index) == True:
-            print("ERROR - Can't put instruction in cache if it's already there")
             return -1 # Can't put instruction into cache if it's already there
 
         # Adds 4 instructions into cache

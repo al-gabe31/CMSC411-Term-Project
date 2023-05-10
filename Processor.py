@@ -174,7 +174,6 @@ class Processor:
         
         elif instruction.op_code == "HLT":
             self.HLT_ID = True
-            print("HLT_ID now set to True")
 
             self.update_stop_cycle(instruction.instruction_id, 1)
 
@@ -526,7 +525,6 @@ class Processor:
                 
                 # We then validate the mem_address
                 if mem_address < 256 or mem_address >= 384:
-                    print("ERROR IN LW - mem_address out of bounds")
                     return -1
                 
                 line_index = mem_address - 256 # Since data starts at address 0x100
@@ -569,7 +567,7 @@ class Processor:
                     
                     # This is just here just in case something unexpected happens
                     else:
-                        print("ERROR IN LW - Uknown case happened")
+                        pass
             
             elif instruction.op_code == "SW":
                 reg3 = self.registers[get_reg_num(instruction.operands[0])]
@@ -578,7 +576,6 @@ class Processor:
 
                 # We then validate the mem_address
                 if mem_address < 256 or mem_address >= 384:
-                    print("ERROR IN SW - mem_address out of bounds")
                     return -1
                 
                 line_index = mem_address - 256 # Since data starts at address 0x100
@@ -619,7 +616,7 @@ class Processor:
                     
                     # This is just here just in case something unexpected happens
                     else:
-                        print("ERROR IN SW - Uknown case happened")
+                        pass
             
             if is_ready:
                 # Record exit cycle for this instruction
@@ -699,16 +696,11 @@ class Processor:
     # Shifts all Instructions to their next stage
     def shift(self):
         if self.IF.is_null():
-            print(f"HLT in IF --> {self.IF.op_code == 'HLT'}")
-            print(f"HLT IN ID --> {self.ID.op_code == 'HLT'}")
-            
             if self.inst_mem.miss_cycles_left > 0:
-                print("I-Cache Miss STALL")
                 self.inst_mem.miss_cycles_left -= 1
                 if self.inst_mem.miss_cycles_left == 0:
                     self.in_cache_miss = False
             elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == True:
-                print("I-Cache Hit!")
                 self.inst_mem.num_access_requests += 1
                 self.inst_mem.num_inst_cache_hits += 1
                 self.IF = deepcopy(self.inst_mem.instructions[self.program_counter])
@@ -717,13 +709,12 @@ class Processor:
                 self.program_counter += 1
             elif self.inst_mem.pc_out_of_bounds(self.program_counter) == False and self.inst_mem.instruction_in_cache(self.program_counter) == False and self.HLT_ID == False and self.ID.op_code != "HLT":
                 if self.in_cache_miss == False:
-                    print("I-Cache Miss")
                     self.inst_mem.put_instruction_in_cache(self.program_counter)
                     self.inst_mem.miss_cycles_left = 10
                     self.in_cache_miss = True
                     self.inst_mem.num_inst_cache_hits -= 1 # Quick fix :)
                 else:
-                    print("Waiting for D-Cache Miss to Resolve")
+                    pass
             else:
                 self.IF = Instruction("NULL")
         
@@ -764,12 +755,12 @@ class Processor:
         
         # Loading all instructions into the processor stage
         while (self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False) and self.cycle_num < SAFETY:
-            print(f"CYCLE {self.cycle_num}")
+            # print(f"CYCLE {self.cycle_num}")
 
             self.shift()
-            self.display_curr_state()
+            # self.display_curr_state()
             self.cycle_num += 1
-            print("")
+            # print("")
         
         self.write_file()
         

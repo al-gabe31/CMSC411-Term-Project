@@ -24,9 +24,9 @@ class Data:
                 self.data_decimal += pow(2, i) * self.data_binary[31 - i]
                 
         elif len(line) != 32:
-            print(f"ERROR - Line Length Actually = {len(line)}")
+            pass
         elif actual_count := line.count("0") + line.count("1") != 32:
-            print(f"ERROR - Actual Count = {actual_count}")
+            pass
     
     # Updates the values stored inside a Data object
     def update(self, new_value):
