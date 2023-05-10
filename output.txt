@@ -1,4 +1,4 @@
-Cycle Number for Each Stage			IF		ID		EX4		MEM		WB
+Cycle Number for Each Stage         IF      ID      EX4     MEM     WB
         LI      R1, 256             12      13      17      18      19
         LW      R3, 0(R1)           13      14      18      39      40
         LI      R5, 1               14      15      39      40      41

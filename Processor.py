@@ -847,7 +847,23 @@ class Processor:
     # Writes the output.txt file
     def write_file(self):
         with open("output.txt", "w") as file:
-            file.write("Cycle Number for Each Stage\t\t\tIF\t\tID\t\tEX4\t\tMEM\t\tWB\n")
+            first_line = "Cycle Number for Each Stage"
+            stages = ["IF", "ID", "EX4", "MEM"]
+
+            while len(first_line) < 36:
+                first_line += " "
+            
+            for i in range(len(stages)):
+                a_line = stages[i]
+
+                while len(a_line) < 8:
+                    a_line += " "
+                
+                first_line += a_line
+            
+            first_line += "WB\n"
+            
+            file.write(first_line)
 
             for i in range(len(self.instructions)):
                 file.write(f"{self.instruction_line_format(i)}\n")
