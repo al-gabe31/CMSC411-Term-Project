@@ -17,3 +17,6 @@ Before doing anything, make sure that you have the right instructions in inst.tx
 You can change what instructions the simulation takes by pasting in a different instruction in the inst.txt file. Just type "make" again to let the simulation run.
 
 Once you are done with the simulation, you can delete output.txt by typing "make clean". This assumes that you're running this in a Bash terminal (since it uses the "rm output.txt command).
+
+# Changing the Safety (Prevents Infinite While Loop)
+In the Processor.py file at line 754, there is a SAFETY variable meant to prevent an infinite while loop. It sets the maximum cycle number that the processor will take. It's currently set at a really high number (1000) since I doubt any 32 instruction should take more than 1000 cycles (unless it's an infinite branching loop). Feel free to change the SAFETY variable to a higher number if needed.

@@ -751,7 +751,7 @@ class Processor:
             print(f"R{i} --> {self.registers[i].data}")
     
     def run(self):
-        SAFETY = 75 # Prevents infinite while loop
+        SAFETY = 1000 # Prevents infinite while loop
         
         # Loading all instructions into the processor stage
         while (self.inst_mem.pc_out_of_bounds(self.program_counter) == False or self.is_all_null() == False) and self.cycle_num < SAFETY:
